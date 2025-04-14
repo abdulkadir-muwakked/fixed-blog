@@ -10,7 +10,7 @@ import {
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
+  CardTitle, 
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,6 +40,10 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent rapid successive attempts
+    if (isLoading) return;
+    
     setIsLoading(true);
   
     try {
@@ -51,6 +55,8 @@ export default function LoginPage() {
       });
   
       if (result?.error) {
+        // Add delay on failed attempt
+        await new Promise(resolve => setTimeout(resolve, 1000));
         toast.error("Invalid email or password");
       } else {
         router.push(callbackUrl || "/dashboard");

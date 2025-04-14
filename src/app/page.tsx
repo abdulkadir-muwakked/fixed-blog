@@ -2,56 +2,30 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
-import { redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
+import { db } from "@/lib/db";
+import { posts } from "@/lib/db/schema";
+import { eq, desc } from "drizzle-orm";
 
 // تصحيح: نقل عملية التوجيه داخل المكون بشكل صحيح
-export default function Home() {
-  // إعادة التوجيه إلى اللغة الافتراضية إذا كانت الصفحة الرئيسية
- 
-  const featuredPosts = [
-    {
-      id: "1",
-      title: "Getting Started with Next.js 14",
-      excerpt:
-        "Learn how to build modern web applications with Next.js 14 and React 18.",
-      slug: "getting-started-with-nextjs-14",
-      featuredImage: "https://images.unsplash.com/photo-1587620962725-abab7fe55159",
-      publishedAt: new Date("2023-10-15"),
-      author: {
-        name: "John Doe",
-        image: "https://randomuser.me/api/portraits/men/32.jpg",
-      },
-      categories: ["Next.js", "React"],
-    },
-    {
-      id: "2",
-      title: "Styling Modern Applications with Tailwind CSS",
-      excerpt:
-        "Discover how to use Tailwind CSS to create beautiful user interfaces quickly.",
-      slug: "styling-with-tailwind-css",
-      featuredImage: "https://images.unsplash.com/photo-1517180102446-f3ece451e9d8",
-      publishedAt: new Date("2023-10-10"),
-      author: {
-        name: "Jane Smith",
-        image: "https://randomuser.me/api/portraits/women/44.jpg",
-      },
-      categories: ["CSS", "Design"],
-    },
-    {
-      id: "3",
-      title: "Building a Blog with Markdown and Next.js",
-      excerpt:
-        "Create a powerful blog using Markdown for content and Next.js for delivery.",
-      slug: "blog-with-markdown-nextjs",
-      featuredImage: "https://images.unsplash.com/photo-1499750310107-5fef28a66643",
-      publishedAt: new Date("2023-09-28"),
-      author: {
-        name: "Alex Johnson",
-        image: "https://randomuser.me/api/portraits/men/54.jpg",
-      },
-      categories: ["Next.js", "Markdown"],
-    },
-  ];
+export default async function Home() {
+  // Fetch featured posts from the database
+  const featuredPosts = await db
+    .select({
+      id: posts.id,
+      title: posts.title,
+      slug: posts.slug,
+      content: posts.content,
+      excerpt: posts.excerpt,
+      featuredImage: posts.featuredImage,
+      status: posts.status,
+      publishedAt: posts.publishedAt,
+      authorId: posts.authorId,
+    })
+    .from(posts)
+    .where(eq(posts.isFeatured, true))
+    .orderBy(desc(posts.publishedAt))
+    .limit(3);
 
   return (
     <>
@@ -72,7 +46,11 @@ export default function Home() {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-            <Button variant="outline" size="lg" className="bg-transparent text-white border-white hover:bg-white hover:text-slate-950">
+            <Button
+              variant="outline"
+              size="lg"
+              className="bg-transparent text-white border-white hover:bg-white hover:text-slate-950"
+            >
               <Link href="/categories">Browse Categories</Link>
             </Button>
           </div>
@@ -103,52 +81,45 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredPosts.map((post) => (
               <article
-                key={post.id}
+                key={post.id as string} // Explicitly cast to string
                 className="flex flex-col overflow-hidden rounded-lg border bg-background transition-all hover:shadow-md"
               >
                 <div className="relative h-48 w-full overflow-hidden">
                   <Image
-                    src={`${post.featuredImage}?w=600&h=400&fit=crop`}
-                    alt={post.title}
+                    src={`${post.featuredImage as string}?w=600&h=400&fit=crop`} // Explicitly cast to string
+                    alt={post.title as string} // Explicitly cast to string
                     fill
                     className="object-cover transition-transform hover:scale-105"
                   />
                 </div>
                 <div className="flex flex-col flex-1 p-6">
-                  <div className="flex items-center gap-2 mb-2">
-                    {post.categories.map((category) => (
-                      <span
-                        key={category}
-                        className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors"
-                      >
-                        {category}
-                      </span>
-                    ))}
-                  </div>
                   <h3 className="text-xl font-semibold leading-tight mb-2">
-                    <Link href={`/blog/${post.slug}`} className="hover:underline">
-                      {post.title}
+                    <Link
+                      href={`/blog/${post.slug as string}`} // Explicitly cast to string
+                      className="hover:underline"
+                    >
+                      {post.title as string}
                     </Link>
                   </h3>
-                  <p className="text-muted-foreground flex-1 mb-4">{post.excerpt}</p>
+                  <p className="text-muted-foreground flex-1 mb-4">
+                    {post.excerpt as string}
+                  </p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="relative h-8 w-8 rounded-full overflow-hidden">
-                        <Image
-                          src={post.author.image}
-                          alt={post.author.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <span className="text-sm font-medium">{post.author.name}</span>
+                      <span className="text-sm font-medium">
+                        Author ID: {post.authorId as string}
+                        to string
+                      </span>
                     </div>
                     <time className="text-sm text-muted-foreground">
-                      {new Date(post.publishedAt).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
+                      {post.publishedAt &&
+                        new Date(
+                          post.publishedAt as unknown as string
+                        ).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
                     </time>
                   </div>
                 </div>
@@ -161,7 +132,9 @@ export default function Home() {
       {/* Newsletter Section */}
       <section className="bg-muted py-16">
         <div className="container flex flex-col items-center text-center">
-          <h2 className="text-3xl font-bold mb-4">Subscribe to Our Newsletter</h2>
+          <h2 className="text-3xl font-bold mb-4">
+            Subscribe to Our Newsletter
+          </h2>
           <p className="text-muted-foreground max-w-2xl mb-8">
             Stay updated with the latest articles, tutorials, and insights
             delivered directly to your inbox.

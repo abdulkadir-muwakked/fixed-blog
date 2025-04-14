@@ -1,3 +1,7 @@
+/**
+ * @File: src/lib/auth/types.ts
+ */
+
 import type { DefaultSession, DefaultUser } from "next-auth";
 import { JWT } from "next-auth/jwt";
 

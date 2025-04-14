@@ -8,6 +8,9 @@ import PostsList from "@/components/dashboard/posts-list";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus } from "lucide-react";
+import { db } from "@/lib/db";
+import { posts as postsTable } from "@/lib/db/schema";
+import { eq, InferModel } from "drizzle-orm";
 
 export default async function PostsPage() {
   const session = await getServerSession(authOptions);
@@ -16,42 +19,45 @@ export default async function PostsPage() {
     redirect("/login?callbackUrl=/dashboard/posts");
   }
 
-  // In a real app, we would fetch posts from the database for the authenticated user
-  // We'll use the same mock data for now
-  const posts = [
-    {
-      id: "1",
-      title: "Getting Started with Next.js 14",
-      excerpt: "Learn how to build modern web applications with Next.js 14 and React 18.",
-      slug: "getting-started-with-nextjs-14",
-      status: "PUBLISHED",
-      publishedAt: new Date("2023-10-15"),
-    },
-    {
-      id: "2",
-      title: "Styling Modern Applications with Tailwind CSS",
-      excerpt: "Discover how to use Tailwind CSS to create beautiful user interfaces quickly.",
-      slug: "styling-with-tailwind-css",
-      status: "PUBLISHED",
-      publishedAt: new Date("2023-10-10"),
-    },
-    {
-      id: "3",
-      title: "Building a Blog with Markdown and Next.js",
-      excerpt: "Create a powerful blog using Markdown for content and Next.js for delivery.",
-      slug: "blog-with-markdown-nextjs",
-      status: "DRAFT",
-      publishedAt: null,
-    },
-    {
-      id: "4",
-      title: "Authentication in Modern Web Applications",
-      excerpt: "Implement secure authentication for your web applications using NextAuth.js.",
-      slug: "authentication-modern-web-apps",
-      status: "DRAFT",
-      publishedAt: null,
-    },
-  ];
+  // Update the posts query to include all required fields
+  const posts: InferModel<typeof postsTable>[] = await db
+    .select({
+      id: postsTable.id,
+      slug: postsTable.slug,
+      createdAt: postsTable.createdAt,
+      updatedAt: postsTable.updatedAt,
+      title: postsTable.title,
+      content: postsTable.content,
+      excerpt: postsTable.excerpt ?? "", // Ensure excerpt is a string
+      featuredImage: postsTable.featuredImage,
+      status: postsTable.status,
+      publishedAt: postsTable.publishedAt,
+      isFeatured: postsTable.isFeatured,
+      metaDescription: postsTable.metaDescription,
+      metaKeywords: postsTable.metaKeywords,
+      locale: postsTable.locale,
+      authorId: postsTable.authorId,
+    })
+    .from(postsTable)
+    .where(eq(postsTable.authorId, session.user.id));
+
+  // Map posts to ensure `excerpt` is always a string
+  const formattedPosts = posts.map((post) => ({
+    ...post,
+    excerpt: post.excerpt ?? "", // Default to an empty string if null
+  }));
+
+  // Filter out posts with the "ARCHIVED" status
+  const filteredPosts = formattedPosts.filter(
+    (post) => post.status !== "ARCHIVED"
+  );
+
+  // Explicitly cast filteredPosts to the expected type
+  const typedPosts = filteredPosts as Array<
+    Omit<(typeof filteredPosts)[number], "status"> & {
+      status: "DRAFT" | "PUBLISHED";
+    }
+  >;
 
   return (
     <DashboardShell>
@@ -66,7 +72,7 @@ export default async function PostsPage() {
           </Button>
         </DashboardHeader>
 
-        <PostsList posts={posts} />
+        <PostsList posts={typedPosts} />
       </div>
     </DashboardShell>
   );

@@ -1,3 +1,7 @@
+/**
+ * @File: src/lib/auth/drizzle-adapter.ts
+ */
+
 import { and, eq } from "drizzle-orm";
 import type { Adapter, AdapterAccount, AdapterSession, AdapterUser, VerificationToken } from "next-auth/adapters";
 import { db } from "@/lib/db"; // تأكد من استخدام المسار الصحيح

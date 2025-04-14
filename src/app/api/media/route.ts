@@ -1,3 +1,7 @@
+/**
+ * @File: src/app/api/media/route.ts
+ */
+
 import { db } from "@/lib/db";
 import { media } from "@/lib/db/schema";
 import { desc } from "drizzle-orm";

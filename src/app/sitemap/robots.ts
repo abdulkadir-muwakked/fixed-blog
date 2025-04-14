@@ -1,3 +1,7 @@
+/**
+ * @File: src/app/sitemap/robots.ts
+ */
+
 import { MetadataRoute } from 'next';
 
 // This generates the robots.txt file for the application

@@ -10,17 +10,57 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
 
+  // Handle loading state
+  if (status === "loading") {
+    return (
+      <div className="container flex h-screen max-w-screen-md flex-col items-center justify-center py-12">
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span>Checking authentication...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // If not authenticated
+  if (!session) {
+    return (
+      <div className="container flex h-screen max-w-screen-md flex-col items-center justify-center py-12">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold text-center">
+              Access Denied
+            </CardTitle>
+            <CardDescription className="text-center">
+              You must be logged in to access this page
+            </CardDescription>
+          </CardHeader>
+          <CardFooter className="flex justify-center">
+            <Button onClick={() => router.push("/login")}>
+              Go to Login
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
+
+  // Main content for authenticated users
   return (
     <div className="container flex h-screen max-w-screen-md flex-col items-center justify-center py-12">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Registration Disabled</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">
+            Registration Disabled
+          </CardTitle>
           <CardDescription className="text-center">
             Public registration is not available for this application
           </CardDescription>
@@ -39,8 +79,8 @@ export default function RegisterPage() {
           </div>
         </CardContent>
         <CardFooter className="flex justify-center">
-          <Button variant="outline" onClick={() => router.push("/login")}>
-            Back to Login
+          <Button variant="outline" onClick={() => router.push("/dashboard")}>
+            Go to Dashboard
           </Button>
         </CardFooter>
       </Card>

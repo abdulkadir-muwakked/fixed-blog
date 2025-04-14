@@ -6,6 +6,11 @@ import DashboardShell from "@/components/dashboard/dashboard-shell";
 import DashboardHeader from "@/components/dashboard/dashboard-header";
 import PostForm from "@/components/dashboard/post-form";
 import { Toaster } from "@/components/ui/toaster";
+import { db } from "@/lib/db";
+import { categories, posts } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
+import { InferModel } from "drizzle-orm";
+import { categories as categoriesTable } from "@/lib/db/schema";
 
 interface EditPostPageProps {
   params: {
@@ -20,65 +25,49 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
     redirect("/login?callbackUrl=/dashboard/posts");
   }
 
-  // In a real app, we would fetch the post from the database
-  // We're using mock data for demonstration purposes
-  const posts = [
-    {
-      id: "1",
-      title: "Getting Started with Next.js 14",
-      content: "<h1>Getting Started with Next.js 14</h1><p>This is a comprehensive guide to getting started with Next.js 14...</p>",
-      excerpt: "Learn how to build modern web applications with Next.js 14 and React 18.",
-      slug: "getting-started-with-nextjs-14",
-      status: "PUBLISHED",
-      categoryId: "3",
-      publishedAt: new Date("2023-10-15"),
-    },
-    {
-      id: "2",
-      title: "Styling Modern Applications with Tailwind CSS",
-      content: "<h1>Styling Modern Applications with Tailwind CSS</h1><p>This guide explores how to use Tailwind CSS effectively...</p>",
-      excerpt: "Discover how to use Tailwind CSS to create beautiful user interfaces quickly.",
-      slug: "styling-with-tailwind-css",
-      status: "PUBLISHED",
-      categoryId: "2",
-      publishedAt: new Date("2023-10-10"),
-    },
-    {
-      id: "3",
-      title: "Building a Blog with Markdown and Next.js",
-      content: "<h1>Building a Blog with Markdown and Next.js</h1><p>In this tutorial, we'll explore how to build a blog using Markdown...</p>",
-      excerpt: "Create a powerful blog using Markdown for content and Next.js for delivery.",
-      slug: "blog-with-markdown-nextjs",
-      status: "DRAFT",
-      categoryId: "3",
-      publishedAt: null,
-    },
-    {
-      id: "4",
-      title: "Authentication in Modern Web Applications",
-      content: "<h1>Authentication in Modern Web Applications</h1><p>This guide covers authentication best practices...</p>",
-      excerpt: "Implement secure authentication for your web applications using NextAuth.js.",
-      slug: "authentication-modern-web-apps",
-      status: "DRAFT",
-      categoryId: "1",
-      publishedAt: null,
-    },
-  ];
+  // Define the correct type for categories
+  const categories: InferModel<typeof categoriesTable>[] = await db
+    .select({
+      id: categoriesTable.id,
+      name: categoriesTable.name,
+      slug: categoriesTable.slug,
+      description: categoriesTable.description,
+      createdAt: categoriesTable.createdAt,
+      updatedAt: categoriesTable.updatedAt,
+    })
+    .from(categoriesTable);
 
-  const post = posts.find(post => post.id === params.id);
+  // Adjust the post query to exclude `categoryId` if it doesn't exist in the schema
+  const post = await db
+    .select({
+      id: posts.id,
+      title: posts.title,
+      content: posts.content,
+      excerpt: posts.excerpt ?? "", // Ensure excerpt is a string
+      slug: posts.slug,
+      status: posts.status,
+      publishedAt: posts.publishedAt,
+    })
+    .from(posts)
+    .where(eq(posts.id, params.id))
+    .then((res) => res[0]);
 
   if (!post) {
     redirect("/dashboard/posts");
   }
 
-  // In a real app, we would fetch categories from the database
-  const categories = [
-    { id: "1", name: "Technology" },
-    { id: "2", name: "Design" },
-    { id: "3", name: "Development" },
-    { id: "4", name: "Marketing" },
-    { id: "5", name: "Business" },
-  ];
+  // Ensure `excerpt` is always a string before passing to PostForm
+  const formattedPost = {
+    ...post,
+    excerpt: post.excerpt ?? "", // Default to an empty string if null
+  };
+
+  // Ensure `excerpt` is always a string in `mappedPost`
+  const mappedPost = {
+    ...post,
+    status: post.status === "ARCHIVED" ? "DRAFT" : post.status, // Map ARCHIVED to DRAFT
+    excerpt: post.excerpt ?? "", // Default to an empty string if null
+  };
 
   return (
     <DashboardShell>
@@ -90,10 +79,7 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
         />
 
         <div className="grid gap-4">
-          <PostForm
-            post={post}
-            categories={categories}
-          />
+          <PostForm post={mappedPost} categories={categories} />
         </div>
 
         <Toaster />

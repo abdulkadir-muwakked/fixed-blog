@@ -1,3 +1,7 @@
+/**
+ * @File: src/app/sitemap/sitemap.ts
+ */
+
 import { MetadataRoute } from 'next';
 
 // In a real application, you would fetch this data from your database

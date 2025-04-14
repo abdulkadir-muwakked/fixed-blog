@@ -6,6 +6,9 @@ import DashboardShell from "@/components/dashboard/dashboard-shell";
 import DashboardHeader from "@/components/dashboard/dashboard-header";
 import PostForm from "@/components/dashboard/post-form";
 import { Toaster } from "@/components/ui/toaster";
+import { db } from "@/lib/db";
+import { InferModel } from "drizzle-orm";
+import { categories as categoriesTable } from "@/lib/db/schema";
 
 export default async function CreatePostPage() {
   const session = await getServerSession(authOptions);
@@ -14,14 +17,17 @@ export default async function CreatePostPage() {
     redirect("/login?callbackUrl=/dashboard/posts/create");
   }
 
-  // In a real app, we would fetch categories from the database
-  const categories = [
-    { id: "1", name: "Technology" },
-    { id: "2", name: "Design" },
-    { id: "3", name: "Development" },
-    { id: "4", name: "Marketing" },
-    { id: "5", name: "Business" },
-  ];
+  // Fetch categories dynamically from the database
+  const categories: InferModel<typeof categoriesTable>[] = await db
+    .select({
+      id: categoriesTable.id,
+      name: categoriesTable.name,
+      slug: categoriesTable.slug,
+      description: categoriesTable.description,
+      createdAt: categoriesTable.createdAt,
+      updatedAt: categoriesTable.updatedAt,
+    })
+    .from(categoriesTable);
 
   return (
     <DashboardShell>

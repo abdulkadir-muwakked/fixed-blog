@@ -43,7 +43,7 @@ interface Category {
   id: string;
   name: string;
   slug: string;
-  postCount: number;
+  postCount?: number; // جعلنا postCount اختيارية
 }
 
 interface CategoryManagerProps {
@@ -74,13 +74,10 @@ export default function CategoryManager({ categories: initialCategories }: Categ
     try {
       setIsSubmitting(true);
 
-      // Generate slug if it doesn't exist
       const slug = formData.slug || formData.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
 
-      // In a real app, this would be an API call
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Create new category with a random ID
       const newCategory: Category = {
         id: Math.random().toString(36).substring(2, 9),
         name: formData.name,
@@ -122,10 +119,8 @@ export default function CategoryManager({ categories: initialCategories }: Categ
     try {
       setIsSubmitting(true);
 
-      // Generate slug if it doesn't exist
       const slug = formData.slug || formData.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
 
-      // In a real app, this would be an API call
       await new Promise(resolve => setTimeout(resolve, 500));
 
       setCategories(prev =>
@@ -162,7 +157,6 @@ export default function CategoryManager({ categories: initialCategories }: Categ
     try {
       setIsSubmitting(true);
 
-      // In a real app, this would be an API call
       await new Promise(resolve => setTimeout(resolve, 500));
 
       setCategories(prev => prev.filter(cat => cat.id !== selectedCategory.id));
@@ -243,7 +237,7 @@ export default function CategoryManager({ categories: initialCategories }: Categ
                       <DropdownMenuItem
                         onClick={() => openDeleteDialog(category)}
                         className="text-destructive focus:text-destructive"
-                        disabled={category.postCount > 0}
+                        disabled={(category.postCount ?? 0) > 0}
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
                         <span>Delete</span>
@@ -257,9 +251,9 @@ export default function CategoryManager({ categories: initialCategories }: Categ
               </CardHeader>
               <CardFooter className="pb-4">
                 <div className="text-sm">
-                  {category.postCount} {category.postCount === 1 ? "post" : "posts"}
+                  {category.postCount ?? 0} {category.postCount === 1 ? "post" : "posts"}
                 </div>
-                {category.postCount > 0 && (
+                {(category.postCount ?? 0) > 0 && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -380,7 +374,7 @@ export default function CategoryManager({ categories: initialCategories }: Categ
           <DialogHeader>
             <DialogTitle>Delete Category</DialogTitle>
             <DialogDescription>
-              {selectedCategory?.postCount > 0
+              {selectedCategory && (selectedCategory.postCount ?? 0) > 0
                 ? `This category contains ${selectedCategory.postCount} posts and cannot be deleted.`
                 : "Are you sure you want to delete this category? This action cannot be undone."}
             </DialogDescription>
@@ -392,7 +386,7 @@ export default function CategoryManager({ categories: initialCategories }: Categ
             <Button
               variant="destructive"
               onClick={handleDeleteCategory}
-              disabled={selectedCategory?.postCount! > 0 || isSubmitting}
+              disabled={!selectedCategory || (selectedCategory.postCount ?? 0) > 0 || isSubmitting}
             >
               {isSubmitting ? "Deleting..." : "Delete"}
             </Button>

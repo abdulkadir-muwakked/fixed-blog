@@ -1,10 +1,14 @@
+/**
+ * @File: src/components/ui/use-toast.ts
+ */
+
 // Inspired by react-hot-toast library
 import * as React from "react";
 
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast";
 
 const TOAST_LIMIT = 5;
-const TOAST_REMOVE_DELAY = 1000000;
+const TOAST_REMOVE_DELAY = 5000; // Reduced from 1000000ms to 5000ms for better memory management
 
 type ToasterToast = ToastProps & {
   id: string;
@@ -135,6 +139,11 @@ function dispatch(action: Action) {
   });
 }
 
+// Ensure proper cleanup of listeners
+function cleanupListeners() {
+  listeners.length = 0;
+}
+
 interface Toast extends Omit<ToasterToast, "id"> {}
 
 function toast({ ...props }: Toast) {
@@ -186,4 +195,4 @@ function useToast() {
   };
 }
 
-export { useToast, toast };
+export { useToast, toast, cleanupListeners };

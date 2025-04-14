@@ -1,3 +1,7 @@
+/**
+ * @File: src/lib/auth/utils.ts
+ */
+
 import { db } from "@/lib/db"; // أو المسار الصحيح حسب هيكل مشروعك
 import { users } from "../db/schema";
 import { eq } from "drizzle-orm";

@@ -1,3 +1,7 @@
+/**
+ * @File: src/lib/auth/service.ts
+ */
+
 import bcrypt from "bcryptjs";
 import { db } from "../db";
 import { users } from "../db/schema";

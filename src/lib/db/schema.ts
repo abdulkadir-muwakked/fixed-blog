@@ -1,4 +1,13 @@
-import { sqliteTable, text, integer, primaryKey } from "drizzle-orm/sqlite-core";
+/**
+ * @File: src/lib/db/schema.ts
+ */
+
+import {
+  sqliteTable,
+  text,
+  integer,
+  primaryKey,
+} from "drizzle-orm/sqlite-core";
 import { relations, sql } from "drizzle-orm";
 import type { InferSelectModel, InferInsertModel } from "drizzle-orm";
 import { createId } from "../utils";
@@ -6,22 +15,35 @@ import { createId } from "../utils";
 // Define timestamp helpers
 const timestamp = () => sql`(strftime('%s', 'now') * 1000)`;
 
-export const users = sqliteTable("users", {
-  id: text("id").notNull().primaryKey().$defaultFn(() => createId()),
+export const users = sqliteTable("User", {
+  // Updated table name to match the database
+  id: text("id")
+    .notNull()
+    .primaryKey()
+    .$defaultFn(() => createId()),
   name: text("name"),
   email: text("email").notNull().unique(),
-  emailVerified: integer("email_verified", { mode: "timestamp_ms" }),
+  emailVerified: integer("emailVerified", { mode: "timestamp_ms" }), // Updated column name to match the database schema
   image: text("image"),
   password: text("password"),
-  role: text("role", { enum: ["USER", "ADMIN"] }).notNull().default("USER"),
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().default(timestamp()),
-  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull().default(timestamp()),
+  role: text("role", { enum: ["USER", "ADMIN"] })
+    .notNull()
+    .default("USER"),
+  createdAt: integer("createdAt", { mode: "timestamp_ms" })
+    .notNull()
+    .default(timestamp()),
+  updatedAt: integer("updatedAt", { mode: "timestamp_ms" })
+    .notNull()
+    .default(timestamp()), // Updated column name to match the database schema
 });
 
 export const accounts = sqliteTable(
   "accounts",
   {
-    id: text("id").notNull().primaryKey().$defaultFn(() => createId()),
+    id: text("id")
+      .notNull()
+      .primaryKey()
+      .$defaultFn(() => createId()),
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -37,12 +59,18 @@ export const accounts = sqliteTable(
     session_state: text("session_state"),
   },
   (table) => ({
-    providerProviderAccountIdIndex: primaryKey(table.provider, table.providerAccountId),
+    providerProviderAccountIdIndex: primaryKey(
+      table.provider,
+      table.providerAccountId
+    ),
   })
 );
 
 export const sessions = sqliteTable("sessions", {
-  id: text("id").notNull().primaryKey().$defaultFn(() => createId()),
+  id: text("id")
+    .notNull()
+    .primaryKey()
+    .$defaultFn(() => createId()),
   sessionToken: text("session_token").notNull().unique(),
   userId: text("user_id")
     .notNull()
@@ -62,32 +90,52 @@ export const verificationTokens = sqliteTable(
   })
 );
 
+// Correct the 'isFeatured' column definition
 export const posts = sqliteTable("posts", {
-  id: text("id").notNull().primaryKey().$defaultFn(() => createId()),
+  id: text("id")
+    .notNull()
+    .primaryKey()
+    .$defaultFn(() => createId()),
   title: text("title").notNull(),
   slug: text("slug").notNull().unique(),
   content: text("content").notNull(),
   excerpt: text("excerpt"),
   featuredImage: text("featured_image"),
-  status: text("status", { enum: ["DRAFT", "PUBLISHED", "ARCHIVED"] }).notNull().default("DRAFT"),
+  status: text("status", { enum: ["DRAFT", "PUBLISHED", "ARCHIVED"] })
+    .notNull()
+    .default("DRAFT"),
   publishedAt: integer("published_at", { mode: "timestamp_ms" }),
   metaDescription: text("meta_description"),
   metaKeywords: text("meta_keywords"),
   locale: text("locale").notNull().default("en"),
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().default(timestamp()),
-  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull().default(timestamp()),
+  createdAt: integer("createdAt", { mode: "timestamp_ms" })
+    .notNull()
+    .default(timestamp()),
+  updatedAt: integer("updatedAt", { mode: "timestamp_ms" })
+    .notNull()
+    .default(timestamp()), // Updated column name to match the database schema
   authorId: text("author_id")
     .notNull()
     .references(() => users.id),
+  isFeatured: integer("is_featured", { mode: "boolean" })
+    .notNull()
+    .default(sql`false`), // Corrected to use integer with boolean mode
 });
 
 export const categories = sqliteTable("categories", {
-  id: text("id").notNull().primaryKey().$defaultFn(() => createId()),
+  id: text("id")
+    .notNull()
+    .primaryKey()
+    .$defaultFn(() => createId()),
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
   description: text("description"),
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().default(timestamp()),
-  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull().default(timestamp()),
+  createdAt: integer("createdAt", { mode: "timestamp_ms" })
+    .notNull()
+    .default(timestamp()),
+  updatedAt: integer("updatedAt", { mode: "timestamp_ms" })
+    .notNull()
+    .default(timestamp()), // Updated column name to match the database schema
 });
 
 export const categoriesOnPosts = sqliteTable(
@@ -99,7 +147,9 @@ export const categoriesOnPosts = sqliteTable(
     categoryId: text("category_id")
       .notNull()
       .references(() => categories.id),
-    assignedAt: integer("assigned_at", { mode: "timestamp_ms" }).notNull().default(timestamp()),
+    assignedAt: integer("assigned_at", { mode: "timestamp_ms" })
+      .notNull()
+      .default(timestamp()),
   },
   (table) => ({
     pk: primaryKey(table.postId, table.categoryId),
@@ -108,10 +158,17 @@ export const categoriesOnPosts = sqliteTable(
 
 // Define comments table with a nullable parentId for hierarchical comments
 export const comments = sqliteTable("comments", {
-  id: text("id").notNull().primaryKey().$defaultFn(() => createId()),
+  id: text("id")
+    .notNull()
+    .primaryKey()
+    .$defaultFn(() => createId()),
   content: text("content").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().default(timestamp()),
-  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull().default(timestamp()),
+  createdAt: integer("createdAt", { mode: "timestamp_ms" })
+    .notNull()
+    .default(timestamp()),
+  updatedAt: integer("updatedAt", { mode: "timestamp_ms" })
+    .notNull()
+    .default(timestamp()), // Updated column name to match the database schema
   postId: text("post_id")
     .notNull()
     .references(() => posts.id, { onDelete: "cascade" }),
@@ -122,9 +179,14 @@ export const comments = sqliteTable("comments", {
 });
 
 export const siteSettings = sqliteTable("site_settings", {
-  id: text("id").notNull().primaryKey().$defaultFn(() => createId()),
+  id: text("id")
+    .notNull()
+    .primaryKey()
+    .$defaultFn(() => createId()),
   title: text("title").notNull().default("My Blog"),
-  description: text("description").notNull().default("A blog built with Next.js"),
+  description: text("description")
+    .notNull()
+    .default("A blog built with Next.js"),
   logo: text("logo"),
   favicon: text("favicon"),
   socialFacebook: text("social_facebook"),
@@ -133,13 +195,20 @@ export const siteSettings = sqliteTable("site_settings", {
   socialLinkedIn: text("social_linkedin"),
   socialGithub: text("social_github"),
   footerText: text("footer_text"),
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().default(timestamp()),
-  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull().default(timestamp()),
+  createdAt: integer("createdAt", { mode: "timestamp_ms" })
+    .notNull()
+    .default(timestamp()),
+  updatedAt: integer("updatedAt", { mode: "timestamp_ms" })
+    .notNull()
+    .default(timestamp()), // Updated column name to match the database schema
 });
 
 // Add media table
 export const media = sqliteTable("media", {
-  id: text("id").notNull().primaryKey().$defaultFn(() => createId()),
+  id: text("id")
+    .notNull()
+    .primaryKey()
+    .$defaultFn(() => createId()),
   filename: text("filename").notNull(),
   url: text("url").notNull(),
   thumbnailUrl: text("thumbnail_url"),
@@ -148,7 +217,9 @@ export const media = sqliteTable("media", {
   height: integer("height").notNull(),
   type: text("type").notNull(),
   alt: text("alt"),
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().default(timestamp()),
+  createdAt: integer("createdAt", { mode: "timestamp_ms" })
+    .notNull()
+    .default(timestamp()),
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
@@ -176,16 +247,19 @@ export const categoriesRelations = relations(categories, ({ many }) => ({
   posts: many(categoriesOnPosts),
 }));
 
-export const categoriesOnPostsRelations = relations(categoriesOnPosts, ({ one }) => ({
-  post: one(posts, {
-    fields: [categoriesOnPosts.postId],
-    references: [posts.id],
-  }),
-  category: one(categories, {
-    fields: [categoriesOnPosts.categoryId],
-    references: [categories.id],
-  }),
-}));
+export const categoriesOnPostsRelations = relations(
+  categoriesOnPosts,
+  ({ one }) => ({
+    post: one(posts, {
+      fields: [categoriesOnPosts.postId],
+      references: [posts.id],
+    }),
+    category: one(categories, {
+      fields: [categoriesOnPosts.categoryId],
+      references: [categories.id],
+    }),
+  })
+);
 
 export const commentsRelations = relations(comments, ({ one, many }) => ({
   post: one(posts, {

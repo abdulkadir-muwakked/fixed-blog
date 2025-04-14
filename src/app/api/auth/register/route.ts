@@ -1,3 +1,7 @@
+/**
+ * @File: src/app/api/auth/register/route.ts
+ */
+
 import { registerUser } from "@/lib/auth/service";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";

@@ -35,7 +35,7 @@
     ".next/types/**/*.ts",
     "next-env.d.ts",
     "build/types/**/*.ts"
-  ],
+, "check-users.js"  ],
   "exclude": [
     "node_modules"
   ]

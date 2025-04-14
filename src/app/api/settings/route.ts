@@ -1,3 +1,7 @@
+/**
+ * @File: src/app/api/settings/route.ts
+ */
+
 import { db } from "@/lib/db";
 import { siteSettings } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
