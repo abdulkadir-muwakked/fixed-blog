@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,13 +29,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Edit,
-  MoreHorizontal,
-  Trash2,
-  Plus,
-  Tag
-} from "lucide-react";
+import { Edit, MoreHorizontal, Trash2, Plus, Tag } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import Link from "next/link";
 
@@ -50,15 +44,20 @@ interface CategoryManagerProps {
   categories: Category[];
 }
 
-export default function CategoryManager({ categories: initialCategories }: CategoryManagerProps) {
+export default function CategoryManager({
+  categories: initialCategories,
+}: CategoryManagerProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [showNewCategoryDialog, setShowNewCategoryDialog] = useState(false);
   const [showEditCategoryDialog, setShowEditCategoryDialog] = useState(false);
-  const [showDeleteCategoryDialog, setShowDeleteCategoryDialog] = useState(false);
+  const [showDeleteCategoryDialog, setShowDeleteCategoryDialog] =
+    useState(false);
   const [formData, setFormData] = useState({ name: "", slug: "" });
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
+    null
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleCreateCategory = async () => {
@@ -74,18 +73,24 @@ export default function CategoryManager({ categories: initialCategories }: Categ
     try {
       setIsSubmitting(true);
 
-      const slug = formData.slug || formData.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
+      const response = await fetch("/api/categories", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          slug: formData.slug,
+        }),
+      });
 
-      await new Promise(resolve => setTimeout(resolve, 500));
+      if (!response.ok) {
+        throw new Error("Failed to create category");
+      }
 
-      const newCategory: Category = {
-        id: Math.random().toString(36).substring(2, 9),
-        name: formData.name,
-        slug,
-        postCount: 0,
-      };
+      const newCategory = await response.json();
 
-      setCategories(prev => [...prev, newCategory]);
+      setCategories((prev) => [...prev, newCategory]);
 
       toast({
         title: "Success",
@@ -96,11 +101,13 @@ export default function CategoryManager({ categories: initialCategories }: Categ
       setFormData({ name: "", slug: "" });
       router.refresh();
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create category",
-        variant: "destructive",
-      });
+      if (error instanceof Error) {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to create category",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -119,12 +126,17 @@ export default function CategoryManager({ categories: initialCategories }: Categ
     try {
       setIsSubmitting(true);
 
-      const slug = formData.slug || formData.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
+      const slug =
+        formData.slug ||
+        formData.name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)+/g, "");
 
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
-      setCategories(prev =>
-        prev.map(cat =>
+      setCategories((prev) =>
+        prev.map((cat) =>
           cat.id === selectedCategory.id
             ? { ...cat, name: formData.name, slug }
             : cat
@@ -141,11 +153,13 @@ export default function CategoryManager({ categories: initialCategories }: Categ
       setSelectedCategory(null);
       router.refresh();
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update category",
-        variant: "destructive",
-      });
+      if (error instanceof Error) {
+        toast({
+          title: "Error",
+          description: "Failed to update category",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -157,9 +171,11 @@ export default function CategoryManager({ categories: initialCategories }: Categ
     try {
       setIsSubmitting(true);
 
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
-      setCategories(prev => prev.filter(cat => cat.id !== selectedCategory.id));
+      setCategories((prev) =>
+        prev.filter((cat) => cat.id !== selectedCategory.id)
+      );
 
       toast({
         title: "Success",
@@ -170,11 +186,13 @@ export default function CategoryManager({ categories: initialCategories }: Categ
       setSelectedCategory(null);
       router.refresh();
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete category",
-        variant: "destructive",
-      });
+      if (error instanceof Error) {
+        toast({
+          title: "Error",
+          description: "Failed to delete category",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -191,6 +209,29 @@ export default function CategoryManager({ categories: initialCategories }: Categ
     setShowDeleteCategoryDialog(true);
   };
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch("/api/categories");
+        if (!response.ok) {
+          throw new Error("Failed to fetch categories");
+        }
+        const data = await response.json();
+        setCategories(data);
+      } catch (error) {
+        if (error instanceof Error) {
+          toast({
+            title: "Error",
+            description: error.message || "Failed to fetch categories",
+            variant: "destructive",
+          });
+        }
+      }
+    };
+
+    fetchCategories();
+  }, [toast]);
+
   return (
     <>
       <div className="flex justify-between items-center">
@@ -206,7 +247,9 @@ export default function CategoryManager({ categories: initialCategories }: Categ
           <Card className="col-span-full">
             <CardContent className="py-8">
               <div className="flex flex-col items-center justify-center text-center space-y-3">
-                <div className="text-muted-foreground">No categories found.</div>
+                <div className="text-muted-foreground">
+                  No categories found.
+                </div>
                 <Button onClick={() => setShowNewCategoryDialog(true)}>
                   <Plus className="mr-2 h-4 w-4" />
                   Create your first category
@@ -219,7 +262,9 @@ export default function CategoryManager({ categories: initialCategories }: Categ
             <Card key={category.id}>
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl font-bold">{category.name}</CardTitle>
+                  <CardTitle className="text-xl font-bold">
+                    {category.name}
+                  </CardTitle>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -229,7 +274,9 @@ export default function CategoryManager({ categories: initialCategories }: Categ
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => openEditDialog(category)}>
+                      <DropdownMenuItem
+                        onClick={() => openEditDialog(category)}
+                      >
                         <Edit className="mr-2 h-4 w-4" />
                         <span>Edit</span>
                       </DropdownMenuItem>
@@ -251,7 +298,8 @@ export default function CategoryManager({ categories: initialCategories }: Categ
               </CardHeader>
               <CardFooter className="pb-4">
                 <div className="text-sm">
-                  {category.postCount ?? 0} {category.postCount === 1 ? "post" : "posts"}
+                  {category.postCount ?? 0}{" "}
+                  {category.postCount === 1 ? "post" : "posts"}
                 </div>
                 {(category.postCount ?? 0) > 0 && (
                   <Button
@@ -272,7 +320,10 @@ export default function CategoryManager({ categories: initialCategories }: Categ
       </div>
 
       {/* New Category Dialog */}
-      <Dialog open={showNewCategoryDialog} onOpenChange={setShowNewCategoryDialog}>
+      <Dialog
+        open={showNewCategoryDialog}
+        onOpenChange={setShowNewCategoryDialog}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create New Category</DialogTitle>
@@ -290,7 +341,10 @@ export default function CategoryManager({ categories: initialCategories }: Categ
                   setFormData({
                     ...formData,
                     name: e.target.value,
-                    slug: e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, ""),
+                    slug: e.target.value
+                      .toLowerCase()
+                      .replace(/[^a-z0-9]+/g, "-")
+                      .replace(/(^-|-$)+/g, ""),
                   });
                 }}
                 placeholder="e.g., Web Development"
@@ -301,16 +355,23 @@ export default function CategoryManager({ categories: initialCategories }: Categ
               <Input
                 id="slug"
                 value={formData.slug}
-                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, slug: e.target.value })
+                }
                 placeholder="e.g., web-development"
               />
               <p className="text-xs text-muted-foreground">
-                This will be used in the URL: /blog?category=<span className="font-mono">{formData.slug || "slug"}</span>
+                This will be used in the URL: /blog?category=
+                <span className="font-mono">{formData.slug || "slug"}</span>
               </p>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowNewCategoryDialog(false)} disabled={isSubmitting}>
+            <Button
+              variant="outline"
+              onClick={() => setShowNewCategoryDialog(false)}
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
             <Button onClick={handleCreateCategory} disabled={isSubmitting}>
@@ -321,13 +382,14 @@ export default function CategoryManager({ categories: initialCategories }: Categ
       </Dialog>
 
       {/* Edit Category Dialog */}
-      <Dialog open={showEditCategoryDialog} onOpenChange={setShowEditCategoryDialog}>
+      <Dialog
+        open={showEditCategoryDialog}
+        onOpenChange={setShowEditCategoryDialog}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Category</DialogTitle>
-            <DialogDescription>
-              Update the category details.
-            </DialogDescription>
+            <DialogDescription>Update the category details.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
@@ -349,16 +411,23 @@ export default function CategoryManager({ categories: initialCategories }: Categ
               <Input
                 id="edit-slug"
                 value={formData.slug}
-                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, slug: e.target.value })
+                }
                 placeholder="e.g., web-development"
               />
               <p className="text-xs text-muted-foreground">
-                This will be used in the URL: /blog?category=<span className="font-mono">{formData.slug || "slug"}</span>
+                This will be used in the URL: /blog?category=
+                <span className="font-mono">{formData.slug || "slug"}</span>
               </p>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowEditCategoryDialog(false)} disabled={isSubmitting}>
+            <Button
+              variant="outline"
+              onClick={() => setShowEditCategoryDialog(false)}
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
             <Button onClick={handleEditCategory} disabled={isSubmitting}>
@@ -369,7 +438,10 @@ export default function CategoryManager({ categories: initialCategories }: Categ
       </Dialog>
 
       {/* Delete Category Dialog */}
-      <Dialog open={showDeleteCategoryDialog} onOpenChange={setShowDeleteCategoryDialog}>
+      <Dialog
+        open={showDeleteCategoryDialog}
+        onOpenChange={setShowDeleteCategoryDialog}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Category</DialogTitle>
@@ -380,13 +452,21 @@ export default function CategoryManager({ categories: initialCategories }: Categ
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDeleteCategoryDialog(false)} disabled={isSubmitting}>
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteCategoryDialog(false)}
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
             <Button
               variant="destructive"
               onClick={handleDeleteCategory}
-              disabled={!selectedCategory || (selectedCategory.postCount ?? 0) > 0 || isSubmitting}
+              disabled={
+                !selectedCategory ||
+                (selectedCategory.postCount ?? 0) > 0 ||
+                isSubmitting
+              }
             >
               {isSubmitting ? "Deleting..." : "Delete"}
             </Button>

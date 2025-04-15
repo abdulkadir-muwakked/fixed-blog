@@ -1,11 +1,8 @@
 {
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/api/auth/register/route": "app/api/auth/register/route.js",
-  "/api/auth/setup/route": "app/api/auth/setup/route.js",
-  "/api/users/admins/route": "app/api/users/admins/route.js",
-  "/dashboard/admins/page": "app/dashboard/admins/page.js",
+  "/api/categories/route": "app/api/categories/route.js",
   "/dashboard/categories/page": "app/dashboard/categories/page.js",
   "/dashboard/page": "app/dashboard/page.js",
-  "/login/page": "app/login/page.js",
-  "/setup/page": "app/setup/page.js"
+  "/dashboard/posts/[id]/edit/page": "app/dashboard/posts/[id]/edit/page.js",
+  "/dashboard/posts/page": "app/dashboard/posts/page.js"
 }

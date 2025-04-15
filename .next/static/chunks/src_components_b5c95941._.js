@@ -845,14 +845,20 @@ function CategoryManager({ categories: initialCategories }) {
         }
         try {
             setIsSubmitting(true);
-            const slug = formData.slug || formData.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
-            await new Promise((resolve)=>setTimeout(resolve, 500));
-            const newCategory = {
-                id: Math.random().toString(36).substring(2, 9),
-                name: formData.name,
-                slug,
-                postCount: 0
-            };
+            const response = await fetch("/api/categories", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    name: formData.name,
+                    slug: formData.slug
+                })
+            });
+            if (!response.ok) {
+                throw new Error("Failed to create category");
+            }
+            const newCategory = await response.json();
             setCategories((prev)=>[
                     ...prev,
                     newCategory
@@ -868,11 +874,13 @@ function CategoryManager({ categories: initialCategories }) {
             });
             router.refresh();
         } catch (error) {
-            toast({
-                title: "Error",
-                description: "Failed to create category",
-                variant: "destructive"
-            });
+            if (error instanceof Error) {
+                toast({
+                    title: "Error",
+                    description: error.message || "Failed to create category",
+                    variant: "destructive"
+                });
+            }
         } finally{
             setIsSubmitting(false);
         }
@@ -907,11 +915,13 @@ function CategoryManager({ categories: initialCategories }) {
             setSelectedCategory(null);
             router.refresh();
         } catch (error) {
-            toast({
-                title: "Error",
-                description: "Failed to update category",
-                variant: "destructive"
-            });
+            if (error instanceof Error) {
+                toast({
+                    title: "Error",
+                    description: "Failed to update category",
+                    variant: "destructive"
+                });
+            }
         } finally{
             setIsSubmitting(false);
         }
@@ -930,11 +940,13 @@ function CategoryManager({ categories: initialCategories }) {
             setSelectedCategory(null);
             router.refresh();
         } catch (error) {
-            toast({
-                title: "Error",
-                description: "Failed to delete category",
-                variant: "destructive"
-            });
+            if (error instanceof Error) {
+                toast({
+                    title: "Error",
+                    description: "Failed to delete category",
+                    variant: "destructive"
+                });
+            }
         } finally{
             setIsSubmitting(false);
         }
@@ -951,6 +963,33 @@ function CategoryManager({ categories: initialCategories }) {
         setSelectedCategory(category);
         setShowDeleteCategoryDialog(true);
     };
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "CategoryManager.useEffect": ()=>{
+            const fetchCategories = {
+                "CategoryManager.useEffect.fetchCategories": async ()=>{
+                    try {
+                        const response = await fetch("/api/categories");
+                        if (!response.ok) {
+                            throw new Error("Failed to fetch categories");
+                        }
+                        const data = await response.json();
+                        setCategories(data);
+                    } catch (error) {
+                        if (error instanceof Error) {
+                            toast({
+                                title: "Error",
+                                description: error.message || "Failed to fetch categories",
+                                variant: "destructive"
+                            });
+                        }
+                    }
+                }
+            }["CategoryManager.useEffect.fetchCategories"];
+            fetchCategories();
+        }
+    }["CategoryManager.useEffect"], [
+        toast
+    ]);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -961,7 +1000,7 @@ function CategoryManager({ categories: initialCategories }) {
                         children: "Categories"
                     }, void 0, false, {
                         fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                        lineNumber: 197,
+                        lineNumber: 238,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -971,20 +1010,20 @@ function CategoryManager({ categories: initialCategories }) {
                                 className: "mr-2 h-4 w-4"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                lineNumber: 199,
+                                lineNumber: 240,
                                 columnNumber: 11
                             }, this),
                             "New Category"
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                        lineNumber: 198,
+                        lineNumber: 239,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                lineNumber: 196,
+                lineNumber: 237,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1001,7 +1040,7 @@ function CategoryManager({ categories: initialCategories }) {
                                     children: "No categories found."
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                    lineNumber: 209,
+                                    lineNumber: 250,
                                     columnNumber: 17
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -1011,30 +1050,30 @@ function CategoryManager({ categories: initialCategories }) {
                                             className: "mr-2 h-4 w-4"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                            lineNumber: 211,
+                                            lineNumber: 254,
                                             columnNumber: 19
                                         }, this),
                                         "Create your first category"
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                    lineNumber: 210,
+                                    lineNumber: 253,
                                     columnNumber: 17
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                            lineNumber: 208,
+                            lineNumber: 249,
                             columnNumber: 15
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                        lineNumber: 207,
+                        lineNumber: 248,
                         columnNumber: 13
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                    lineNumber: 206,
+                    lineNumber: 247,
                     columnNumber: 11
                 }, this) : categories.map((category)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
                         children: [
@@ -1049,7 +1088,7 @@ function CategoryManager({ categories: initialCategories }) {
                                                 children: category.name
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                                lineNumber: 222,
+                                                lineNumber: 265,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenu"], {
@@ -1065,7 +1104,7 @@ function CategoryManager({ categories: initialCategories }) {
                                                                     className: "h-4 w-4"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                                                    lineNumber: 226,
+                                                                    lineNumber: 271,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1073,18 +1112,18 @@ function CategoryManager({ categories: initialCategories }) {
                                                                     children: "Open menu"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                                                    lineNumber: 227,
+                                                                    lineNumber: 272,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                                            lineNumber: 225,
+                                                            lineNumber: 270,
                                                             columnNumber: 23
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                                        lineNumber: 224,
+                                                        lineNumber: 269,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenuContent"], {
@@ -1094,7 +1133,7 @@ function CategoryManager({ categories: initialCategories }) {
                                                                 children: "Actions"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                                                lineNumber: 231,
+                                                                lineNumber: 276,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenuItem"], {
@@ -1104,25 +1143,25 @@ function CategoryManager({ categories: initialCategories }) {
                                                                         className: "mr-2 h-4 w-4"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                                                        lineNumber: 233,
+                                                                        lineNumber: 280,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                         children: "Edit"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                                                        lineNumber: 234,
+                                                                        lineNumber: 281,
                                                                         columnNumber: 25
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                                                lineNumber: 232,
+                                                                lineNumber: 277,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenuSeparator"], {}, void 0, false, {
                                                                 fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                                                lineNumber: 236,
+                                                                lineNumber: 283,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenuItem"], {
@@ -1134,38 +1173,38 @@ function CategoryManager({ categories: initialCategories }) {
                                                                         className: "mr-2 h-4 w-4"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                                                        lineNumber: 242,
+                                                                        lineNumber: 289,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                         children: "Delete"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                                                        lineNumber: 243,
+                                                                        lineNumber: 290,
                                                                         columnNumber: 25
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                                                lineNumber: 237,
+                                                                lineNumber: 284,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                                        lineNumber: 230,
+                                                        lineNumber: 275,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                                lineNumber: 223,
+                                                lineNumber: 268,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                        lineNumber: 221,
+                                        lineNumber: 264,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardDescription"], {
@@ -1175,7 +1214,7 @@ function CategoryManager({ categories: initialCategories }) {
                                                 className: "h-3.5 w-3.5"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                                lineNumber: 249,
+                                                lineNumber: 296,
                                                 columnNumber: 19
                                             }, this),
                                             " ",
@@ -1183,13 +1222,13 @@ function CategoryManager({ categories: initialCategories }) {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                        lineNumber: 248,
+                                        lineNumber: 295,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                lineNumber: 220,
+                                lineNumber: 263,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardFooter"], {
@@ -1204,7 +1243,7 @@ function CategoryManager({ categories: initialCategories }) {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                        lineNumber: 253,
+                                        lineNumber: 300,
                                         columnNumber: 17
                                     }, this),
                                     (category.postCount ?? 0) > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -1217,29 +1256,29 @@ function CategoryManager({ categories: initialCategories }) {
                                             children: "View posts"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                            lineNumber: 263,
+                                            lineNumber: 311,
                                             columnNumber: 21
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                        lineNumber: 257,
+                                        lineNumber: 305,
                                         columnNumber: 19
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                lineNumber: 252,
+                                lineNumber: 299,
                                 columnNumber: 15
                             }, this)
                         ]
                     }, category.id, true, {
                         fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                        lineNumber: 219,
+                        lineNumber: 262,
                         columnNumber: 13
                     }, this))
             }, void 0, false, {
                 fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                lineNumber: 204,
+                lineNumber: 245,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Dialog"], {
@@ -1253,20 +1292,20 @@ function CategoryManager({ categories: initialCategories }) {
                                     children: "Create New Category"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                    lineNumber: 278,
+                                    lineNumber: 329,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DialogDescription"], {
                                     children: "Add a new category to organize your blog posts."
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                    lineNumber: 279,
+                                    lineNumber: 330,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                            lineNumber: 277,
+                            lineNumber: 328,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1280,7 +1319,7 @@ function CategoryManager({ categories: initialCategories }) {
                                             children: "Name"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                            lineNumber: 285,
+                                            lineNumber: 336,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -1296,13 +1335,13 @@ function CategoryManager({ categories: initialCategories }) {
                                             placeholder: "e.g., Web Development"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                            lineNumber: 286,
+                                            lineNumber: 337,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                    lineNumber: 284,
+                                    lineNumber: 335,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1313,7 +1352,7 @@ function CategoryManager({ categories: initialCategories }) {
                                             children: "Slug"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                            lineNumber: 300,
+                                            lineNumber: 354,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -1326,7 +1365,7 @@ function CategoryManager({ categories: initialCategories }) {
                                             placeholder: "e.g., web-development"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                            lineNumber: 301,
+                                            lineNumber: 355,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1338,25 +1377,25 @@ function CategoryManager({ categories: initialCategories }) {
                                                     children: formData.slug || "slug"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                                    lineNumber: 308,
-                                                    columnNumber: 62
+                                                    lineNumber: 365,
+                                                    columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                            lineNumber: 307,
+                                            lineNumber: 363,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                    lineNumber: 299,
+                                    lineNumber: 353,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                            lineNumber: 283,
+                            lineNumber: 334,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DialogFooter"], {
@@ -1368,7 +1407,7 @@ function CategoryManager({ categories: initialCategories }) {
                                     children: "Cancel"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                    lineNumber: 313,
+                                    lineNumber: 370,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -1377,24 +1416,24 @@ function CategoryManager({ categories: initialCategories }) {
                                     children: isSubmitting ? "Creating..." : "Create"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                    lineNumber: 316,
+                                    lineNumber: 377,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                            lineNumber: 312,
+                            lineNumber: 369,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                    lineNumber: 276,
+                    lineNumber: 327,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                lineNumber: 275,
+                lineNumber: 323,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Dialog"], {
@@ -1408,20 +1447,20 @@ function CategoryManager({ categories: initialCategories }) {
                                     children: "Edit Category"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                    lineNumber: 327,
+                                    lineNumber: 391,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DialogDescription"], {
                                     children: "Update the category details."
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                    lineNumber: 328,
+                                    lineNumber: 392,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                            lineNumber: 326,
+                            lineNumber: 390,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1435,7 +1474,7 @@ function CategoryManager({ categories: initialCategories }) {
                                             children: "Name"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                            lineNumber: 334,
+                                            lineNumber: 396,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -1450,13 +1489,13 @@ function CategoryManager({ categories: initialCategories }) {
                                             placeholder: "e.g., Web Development"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                            lineNumber: 335,
+                                            lineNumber: 397,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                    lineNumber: 333,
+                                    lineNumber: 395,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1467,7 +1506,7 @@ function CategoryManager({ categories: initialCategories }) {
                                             children: "Slug"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                            lineNumber: 348,
+                                            lineNumber: 410,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -1480,7 +1519,7 @@ function CategoryManager({ categories: initialCategories }) {
                                             placeholder: "e.g., web-development"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                            lineNumber: 349,
+                                            lineNumber: 411,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1492,25 +1531,25 @@ function CategoryManager({ categories: initialCategories }) {
                                                     children: formData.slug || "slug"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                                    lineNumber: 356,
-                                                    columnNumber: 62
+                                                    lineNumber: 421,
+                                                    columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                            lineNumber: 355,
+                                            lineNumber: 419,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                    lineNumber: 347,
+                                    lineNumber: 409,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                            lineNumber: 332,
+                            lineNumber: 394,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DialogFooter"], {
@@ -1522,7 +1561,7 @@ function CategoryManager({ categories: initialCategories }) {
                                     children: "Cancel"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                    lineNumber: 361,
+                                    lineNumber: 426,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -1531,24 +1570,24 @@ function CategoryManager({ categories: initialCategories }) {
                                     children: isSubmitting ? "Saving..." : "Save Changes"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                    lineNumber: 364,
+                                    lineNumber: 433,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                            lineNumber: 360,
+                            lineNumber: 425,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                    lineNumber: 325,
+                    lineNumber: 389,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                lineNumber: 324,
+                lineNumber: 385,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Dialog"], {
@@ -1562,20 +1601,20 @@ function CategoryManager({ categories: initialCategories }) {
                                     children: "Delete Category"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                    lineNumber: 375,
+                                    lineNumber: 447,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DialogDescription"], {
                                     children: selectedCategory && (selectedCategory.postCount ?? 0) > 0 ? `This category contains ${selectedCategory.postCount} posts and cannot be deleted.` : "Are you sure you want to delete this category? This action cannot be undone."
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                    lineNumber: 376,
+                                    lineNumber: 448,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                            lineNumber: 374,
+                            lineNumber: 446,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DialogFooter"], {
@@ -1587,7 +1626,7 @@ function CategoryManager({ categories: initialCategories }) {
                                     children: "Cancel"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                    lineNumber: 383,
+                                    lineNumber: 455,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -1597,30 +1636,30 @@ function CategoryManager({ categories: initialCategories }) {
                                     children: isSubmitting ? "Deleting..." : "Delete"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                                    lineNumber: 386,
+                                    lineNumber: 462,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                            lineNumber: 382,
+                            lineNumber: 454,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                    lineNumber: 373,
+                    lineNumber: 445,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/dashboard/category-manager.tsx",
-                lineNumber: 372,
+                lineNumber: 441,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true);
 }
-_s(CategoryManager, "HsIew18XNXfiMUS1PTy8Nyg8dWc=", false, function() {
+_s(CategoryManager, "Rc3f9DTgy1XNyO7mktAmtHZ1kJM=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"],
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$use$2d$toast$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useToast"]

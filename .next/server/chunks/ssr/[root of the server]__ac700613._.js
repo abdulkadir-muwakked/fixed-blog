@@ -512,7 +512,8 @@ var { g: global, __dirname } = __turbopack_context__;
 /**
  * @File: src/lib/db/index.ts
  */ __turbopack_context__.s({
-    "db": (()=>db)
+    "db": (()=>db),
+    "fetchCategories": (()=>fetchCategories)
 });
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$drizzle$2d$orm$2f$better$2d$sqlite3$2f$driver$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/drizzle-orm/better-sqlite3/driver.js [app-rsc] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$externals$5d2f$better$2d$sqlite3__$5b$external$5d$__$28$better$2d$sqlite3$2c$__cjs$29$__ = __turbopack_context__.i("[externals]/better-sqlite3 [external] (better-sqlite3, cjs)");
@@ -524,10 +525,11 @@ var __TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$
 ;
 ;
 ;
+;
 // تحديد المسار الصحيح - استخدم المسار المطلق
-const dbPath = __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__["default"].resolve(process.cwd(), 'prisma', 'dev.db');
+const dbPath = __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__["default"].resolve(process.cwd(), "prisma", "dev.db");
 // تصحيح الأخطاء
-console.log('Database path:', dbPath);
+console.log("Database path:", dbPath);
 // تهيئة قاعدة البيانات
 const initDB = ()=>{
     try {
@@ -538,18 +540,24 @@ const initDB = ()=>{
             });
         }
         if (!__TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__["default"].existsSync(dbPath)) {
-            __TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__["default"].writeFileSync(dbPath, '');
+            __TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__["default"].writeFileSync(dbPath, "");
         }
         const sqlite = new __TURBOPACK__imported__module__$5b$externals$5d2f$better$2d$sqlite3__$5b$external$5d$__$28$better$2d$sqlite3$2c$__cjs$29$__["default"](dbPath);
         return (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$drizzle$2d$orm$2f$better$2d$sqlite3$2f$driver$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["drizzle"])(sqlite, {
             schema: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2f$schema$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__
         });
     } catch (error) {
-        console.error('Database initialization error:', error);
+        console.error("Database initialization error:", error);
         throw error;
     }
 };
 const db = initDB();
+async function fetchCategories() {
+    console.log("Fetching categories from database...");
+    const result = await db.select().from(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2f$schema$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["categories"]);
+    console.log("Fetched categories:", result);
+    return result;
+}
 }}),
 "[project]/src/lib/auth/drizzle-adapter.ts [app-rsc] (ecmascript)": ((__turbopack_context__) => {
 "use strict";
