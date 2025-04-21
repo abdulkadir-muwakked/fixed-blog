@@ -3,9 +3,7 @@
  */
 
 import { createRootAdmin } from "@/lib/auth/service";
-import { db } from "@/lib/db";
-import { users } from "@/lib/db/schema";
-import { eq, sql } from "drizzle-orm"; // إضافة الاستيراد المفقود لـ sql
+import prisma from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { User } from "@prisma/client"; // Import the User model from Prisma client
@@ -22,65 +20,40 @@ const setupSchema = z.object({
 export async function GET() {
   try {
     console.log("Checking if admin exists...");
-    const adminExists = await db
-      .select({ count: sql`count(*)` })
-      .from(users) // Use the correct table reference
-      .where(eq(users.role, "ADMIN"))
-      .then((res: { count: unknown }[]) => {
-        console.log("Raw query result:", res);
-        return (res[0]?.count as number) > 0; // تأكيد نوع count كـ number
-      });
+    const adminCount = await prisma.user.count({
+      where: { role: "ADMIN" },
+    });
 
-    console.log("Admin exists:", adminExists);
+    console.log("Admin exists:", adminCount > 0);
 
     return NextResponse.json({
-      setupRequired: !adminExists,
+      setupRequired: adminCount === 0,
     });
-  } catch (error: unknown) {
-    // Use unknown instead of any
-    if (error instanceof Error) {
-      // Type guard to narrow the type
-      console.error("Setup check error:", error);
-      console.error("Error details:", {
-        message: error.message,
-        stack: error.stack,
-        code: (error as any).code, // Cast to any only for specific properties
-      });
-      return NextResponse.json(
-        { error: "Failed to check setup status", details: error.message },
-        { status: 500 }
-      );
-    } else {
-      console.error("Unknown error:", error);
-      return NextResponse.json(
-        { error: "An unknown error occurred" },
-        { status: 500 }
-      );
-    }
+  } catch (error) {
+    console.error("Setup check error:", error);
+    return NextResponse.json(
+      { error: "Failed to check setup status" },
+      { status: 500 }
+    );
   }
 }
 
 // إنشاء حساب الجذر المسؤول
 export async function POST(req: NextRequest) {
   try {
-    // التحقق مما إذا كان هناك أي مستخدمين مسؤولين بالفعل
-    const adminExists = await db
-      .select()
-      .from(users)
-      .where(eq(users.role, "ADMIN")) // Ensure correct column name
-      .then((res) => res.length > 0);
+    const adminCount = await prisma.user.count({
+      where: { role: "ADMIN" },
+    });
 
-    if (adminExists) {
+    if (adminCount > 0) {
       return NextResponse.json(
         { error: "Setup has already been completed" },
         { status: 400 }
       );
     }
 
-    // تحليل جسم الطلب
     const body = await req.json();
 
-    // التحقق من صحة البيانات المدخلة
     const result = setupSchema.safeParse(body);
 
     if (!result.success) {
@@ -90,7 +63,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // إنشاء الجذر المسؤول
     await createRootAdmin(result.data);
 
     return NextResponse.json(

@@ -6,9 +6,9 @@ import DashboardShell from "@/components/dashboard/dashboard-shell";
 import DashboardHeader from "@/components/dashboard/dashboard-header";
 import PostForm from "@/components/dashboard/post-form";
 import { Toaster } from "@/components/ui/toaster";
-import { db } from "@/lib/db";
-import { InferModel } from "drizzle-orm";
-import { categories as categoriesTable } from "@/lib/db/schema";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import prisma from "@/lib/db";
 
 export default async function CreatePostPage() {
   const session = await getServerSession(authOptions);
@@ -17,32 +17,21 @@ export default async function CreatePostPage() {
     redirect("/login?callbackUrl=/dashboard/posts/create");
   }
 
-  // Fetch categories dynamically from the database
-  const categories: InferModel<typeof categoriesTable>[] = await db
-    .select({
-      id: categoriesTable.id,
-      name: categoriesTable.name,
-      slug: categoriesTable.slug,
-      description: categoriesTable.description,
-      createdAt: categoriesTable.createdAt,
-      updatedAt: categoriesTable.updatedAt,
-    })
-    .from(categoriesTable);
+  const categories = await prisma.category.findMany({
+    orderBy: { name: "asc" },
+  });
 
   return (
     <DashboardShell>
       <DashboardNav />
       <div className="flex-1 space-y-4 p-8 pt-6">
-        <DashboardHeader
-          heading="Create Post"
-          text="Create a new blog post and publish it or save as draft"
-        />
+        <DashboardHeader heading="Create Post" text="Add a new blog post">
+          <Button asChild>
+            <Link href="/dashboard/posts">Back to Posts</Link>
+          </Button>
+        </DashboardHeader>
 
-        <div className="grid gap-4">
-          <PostForm categories={categories} />
-        </div>
-
-        <Toaster />
+        <PostForm categories={categories} />
       </div>
     </DashboardShell>
   );

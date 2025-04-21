@@ -3,29 +3,13 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import { redirect } from "next/navigation";
-import { db } from "@/lib/db";
-import { posts } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
+import prisma from "@/lib/db";
 
 // تصحيح: نقل عملية التوجيه داخل المكون بشكل صحيح
-export default async function Home() {
-  // Fetch featured posts from the database
-  const featuredPosts = await db
-    .select({
-      id: posts.id,
-      title: posts.title,
-      slug: posts.slug,
-      content: posts.content,
-      excerpt: posts.excerpt,
-      featuredImage: posts.featuredImage,
-      status: posts.status,
-      publishedAt: posts.publishedAt,
-      authorId: posts.authorId,
-    })
-    .from(posts)
-    .where(eq(posts.isFeatured, true))
-    .orderBy(desc(posts.publishedAt))
-    .limit(3);
+export default async function Page() {
+  const posts = await prisma.post.findMany({
+    orderBy: { createdAt: "desc" },
+  });
 
   return (
     <>
@@ -79,15 +63,15 @@ export default async function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredPosts.map((post) => (
+            {posts.map((post) => (
               <article
                 key={post.id as string} // Explicitly cast to string
                 className="flex flex-col overflow-hidden rounded-lg border bg-background transition-all hover:shadow-md"
               >
                 <div className="relative h-48 w-full overflow-hidden">
                   <Image
-                    src={`${post.featuredImage as string}?w=600&h=400&fit=crop`} // Explicitly cast to string
-                    alt={post.title as string} // Explicitly cast to string
+                    src={post.featuredImage || "/default-image.jpg"}
+                    alt={post.title || "Default Title"}
                     fill
                     className="object-cover transition-transform hover:scale-105"
                   />

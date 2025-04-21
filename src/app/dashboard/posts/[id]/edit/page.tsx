@@ -6,11 +6,7 @@ import DashboardShell from "@/components/dashboard/dashboard-shell";
 import DashboardHeader from "@/components/dashboard/dashboard-header";
 import PostForm from "@/components/dashboard/post-form";
 import { Toaster } from "@/components/ui/toaster";
-import { db } from "@/lib/db";
-import { categories, posts } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
-import { InferModel } from "drizzle-orm";
-import { categories as categoriesTable } from "@/lib/db/schema";
+import prisma from "@/lib/db";
 
 interface EditPostPageProps {
   params: {
@@ -18,56 +14,37 @@ interface EditPostPageProps {
   };
 }
 
-export default async function EditPostPage({ params }: EditPostPageProps) {
+export default async function EditPostPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const session = await getServerSession(authOptions);
 
   if (!session) {
     redirect("/login?callbackUrl=/dashboard/posts");
   }
 
-  // Define the correct type for categories
-  const categories: InferModel<typeof categoriesTable>[] = await db
-    .select({
-      id: categoriesTable.id,
-      name: categoriesTable.name,
-      slug: categoriesTable.slug,
-      description: categoriesTable.description,
-      createdAt: categoriesTable.createdAt,
-      updatedAt: categoriesTable.updatedAt,
-    })
-    .from(categoriesTable);
+  const { id: postId } = await params; // Await `params` to resolve the error
 
-  // Adjust the post query to exclude `categoryId` if it doesn't exist in the schema
-  const post = await db
-    .select({
-      id: posts.id,
-      title: posts.title,
-      content: posts.content,
-      excerpt: posts.excerpt ?? "", // Ensure excerpt is a string
-      slug: posts.slug,
-      status: posts.status,
-      publishedAt: posts.publishedAt,
-    })
-    .from(posts)
-    .where(eq(posts.id, params.id))
-    .then((res) => res[0]);
+  const post = await prisma.post.findUnique({
+    where: { id: postId },
+    include: { categories: true },
+  });
 
   if (!post) {
-    redirect("/dashboard/posts");
+    return <div>Post not found</div>;
   }
 
-  // Ensure `excerpt` is always a string before passing to PostForm
-  const formattedPost = {
+  const normalizedPost = {
     ...post,
-    excerpt: post.excerpt ?? "", // Default to an empty string if null
+    excerpt: post.excerpt ?? "",
+    status: post.status as "PUBLISHED" | "DRAFT",
   };
 
-  // Ensure `excerpt` is always a string in `mappedPost`
-  const mappedPost = {
-    ...post,
-    status: post.status === "ARCHIVED" ? "DRAFT" : post.status, // Map ARCHIVED to DRAFT
-    excerpt: post.excerpt ?? "", // Default to an empty string if null
-  };
+  const categories = await prisma.category.findMany({
+    orderBy: { name: "asc" },
+  });
 
   return (
     <DashboardShell>
@@ -79,7 +56,7 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
         />
 
         <div className="grid gap-4">
-          <PostForm post={mappedPost} categories={categories} />
+          <PostForm post={normalizedPost} categories={categories} />
         </div>
 
         <Toaster />

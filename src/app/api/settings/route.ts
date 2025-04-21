@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
         .update(siteSettings)
         .set({
           title: settingsData.title,
-          description: settingsData.description,
+          description: settingsData.description ?? "",
           logo: settingsData.logo,
           favicon: settingsData.favicon,
           socialFacebook: settingsData.socialFacebook,
@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
       await db.insert(siteSettings).values({
         id: createId(),
         title: settingsData.title,
-        description: settingsData.description,
+        description: settingsData.description ?? "",
         logo: settingsData.logo,
         favicon: settingsData.favicon,
         socialFacebook: settingsData.socialFacebook,

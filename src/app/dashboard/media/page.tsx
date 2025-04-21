@@ -99,13 +99,11 @@ export default function MediaPage() {
     if (files && files.length > 0) {
       const file = files[0];
 
-      // Validate file type
       if (!file.type.startsWith("image/")) {
         toast.error("Only image files are allowed");
         return;
       }
 
-      // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast.error("File size must be less than 5MB");
         return;
@@ -138,8 +136,6 @@ export default function MediaPage() {
 
       toast.success("File uploaded successfully");
       setSelectedFile(null);
-
-      // Refresh media list
       fetchMediaItems();
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -165,8 +161,6 @@ export default function MediaPage() {
       () => {
         setCopied(true);
         toast.success("Copied to clipboard");
-
-        // Reset copy status after 2 seconds
         setTimeout(() => {
           setCopied(false);
         }, 2000);
@@ -213,13 +207,13 @@ export default function MediaPage() {
         />
       </div>
 
-      <Tabs defaultValue="library">
+      <Tabs defaultValue="library" className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger value="library">Media Library</TabsTrigger>
           <TabsTrigger value="upload">Upload New</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="library">
+        <TabsContent value="library" className="w-full">
           <Card>
             <CardHeader>
               <CardTitle>Media Library</CardTitle>
@@ -239,7 +233,9 @@ export default function MediaPage() {
                   <p className="text-muted-foreground mt-1 mb-4">
                     Upload images to use in your blog posts.
                   </p>
-                  <Button onClick={openFileInput}>Upload your first image</Button>
+                  <Button onClick={openFileInput}>
+                    Upload your first image
+                  </Button>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -254,6 +250,7 @@ export default function MediaPage() {
                         alt={item.filename}
                         fill
                         className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs">
                         <span className="px-2 text-center">
@@ -268,7 +265,7 @@ export default function MediaPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="upload">
+        <TabsContent value="upload" className="w-full">
           <Card>
             <CardHeader>
               <CardTitle>Upload New Image</CardTitle>
@@ -339,14 +336,14 @@ export default function MediaPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Image Details Dialog */}
       <Dialog open={showImageDialog} onOpenChange={setShowImageDialog}>
         {selectedImage && (
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>{selectedImage.filename}</DialogTitle>
               <DialogDescription>
-                Uploaded on {new Date(selectedImage.createdAt).toLocaleDateString()}
+                Uploaded on{" "}
+                {new Date(selectedImage.createdAt).toLocaleDateString()}
               </DialogDescription>
             </DialogHeader>
             <div className="relative aspect-video mb-4">
@@ -355,6 +352,7 @@ export default function MediaPage() {
                 alt={selectedImage.filename}
                 fill
                 className="object-contain rounded-md"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
             </div>
             <div className="grid gap-4">
@@ -362,7 +360,9 @@ export default function MediaPage() {
                 <div className="text-muted-foreground">Size:</div>
                 <div>{formatFileSize(selectedImage.size)}</div>
                 <div className="text-muted-foreground">Dimensions:</div>
-                <div>{selectedImage.width} × {selectedImage.height}px</div>
+                <div>
+                  {selectedImage.width} × {selectedImage.height}px
+                </div>
                 <div className="text-muted-foreground">Type:</div>
                 <div>{selectedImage.type}</div>
               </div>

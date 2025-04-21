@@ -28,7 +28,7 @@ import {
   Plus,
   FileUp,
   FileDown,
-  ClipboardList
+  ClipboardList,
 } from "lucide-react";
 
 interface Post {
@@ -46,18 +46,32 @@ interface PostsListProps {
 
 export default function PostsList({ posts }: PostsListProps) {
   const router = useRouter();
-  const [selectedFilter, setSelectedFilter] = useState<"ALL" | "PUBLISHED" | "DRAFT">("ALL");
+  const [selectedFilter, setSelectedFilter] = useState<
+    "ALL" | "PUBLISHED" | "DRAFT"
+  >("ALL");
 
-  const filteredPosts = posts.filter(post => {
+  console.log("Posts received in PostsList:", posts);
+
+  const filteredPosts = posts.filter((post) => {
     if (selectedFilter === "ALL") return true;
     return post.status === selectedFilter;
   });
 
   const deletePost = async (id: string) => {
-    // In a real app, you would call an API to delete the post
-    console.log(`Deleting post with id: ${id}`);
-    // Then refresh the data
-    router.refresh();
+    try {
+      const response = await fetch(`/api/posts?id=${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete post");
+      }
+
+      // Refresh the page after successful deletion
+      router.refresh();
+    } catch (error) {
+      console.error("Error deleting post:", error);
+    }
   };
 
   const publishPost = async (id: string) => {
@@ -132,7 +146,9 @@ export default function PostsList({ posts }: PostsListProps) {
             <Card key={post.id}>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl font-bold">{post.title}</CardTitle>
+                  <CardTitle className="text-xl font-bold">
+                    {post.title}
+                  </CardTitle>
                   <div className="flex items-center space-x-2">
                     <span
                       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
@@ -145,7 +161,11 @@ export default function PostsList({ posts }: PostsListProps) {
                     </span>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                        >
                           <MoreHorizontal className="h-4 w-4" />
                           <span className="sr-only">Open menu</span>
                         </Button>
@@ -166,12 +186,16 @@ export default function PostsList({ posts }: PostsListProps) {
                           </Link>
                         </DropdownMenuItem>
                         {post.status === "DRAFT" ? (
-                          <DropdownMenuItem onClick={() => publishPost(post.id)}>
+                          <DropdownMenuItem
+                            onClick={() => publishPost(post.id)}
+                          >
                             <FileUp className="mr-2 h-4 w-4" />
                             <span>Publish</span>
                           </DropdownMenuItem>
                         ) : (
-                          <DropdownMenuItem onClick={() => unpublishPost(post.id)}>
+                          <DropdownMenuItem
+                            onClick={() => unpublishPost(post.id)}
+                          >
                             <FileDown className="mr-2 h-4 w-4" />
                             <span>Unpublish</span>
                           </DropdownMenuItem>
@@ -194,7 +218,9 @@ export default function PostsList({ posts }: PostsListProps) {
               </CardHeader>
               <CardFooter>
                 <div className="text-sm text-muted-foreground flex justify-between w-full">
-                  <div>Slug: <span className="font-mono">{post.slug}</span></div>
+                  <div>
+                    Slug: <span className="font-mono">{post.slug}</span>
+                  </div>
                   <div>
                     {post.publishedAt
                       ? `Published: ${post.publishedAt.toLocaleDateString()}`

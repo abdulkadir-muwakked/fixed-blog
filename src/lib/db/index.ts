@@ -2,44 +2,35 @@
  * @File: src/lib/db/index.ts
  */
 
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import Database from "better-sqlite3";
-import * as schema from "./schema";
-import path from "path";
-import fs from "fs";
-import { categories } from "./schema";
+import { PrismaClient } from "@prisma/client";
 
-// تحديد المسار الصحيح - استخدم المسار المطلق
-const dbPath = path.resolve(process.cwd(), "prisma", "dev.db");
-
-// تصحيح الأخطاء
-console.log("Database path:", dbPath);
-
-// تهيئة قاعدة البيانات
-const initDB = () => {
-  try {
-    const dbDir = path.dirname(dbPath);
-    if (!fs.existsSync(dbDir)) {
-      fs.mkdirSync(dbDir, { recursive: true });
-    }
-
-    if (!fs.existsSync(dbPath)) {
-      fs.writeFileSync(dbPath, "");
-    }
-
-    const sqlite = new Database(dbPath);
-    return drizzle(sqlite, { schema });
-  } catch (error) {
-    console.error("Database initialization error:", error);
-    throw error;
-  }
-};
-
-export const db = initDB();
+const prisma = new PrismaClient();
 
 export async function fetchCategories() {
   console.log("Fetching categories from database...");
-  const result = await db.select().from(categories);
+  const result = await prisma.category.findMany();
   console.log("Fetched categories:", result);
   return result;
 }
+
+export async function testPostTable() {
+  try {
+    console.log("Testing posts table...");
+    const result = await prisma.post.findMany();
+    console.log("Posts table data:", result);
+  } catch (error) {
+    console.error("Error querying posts table:", error);
+  }
+}
+
+export async function verifyPostTable() {
+  try {
+    console.log("Verifying posts table...");
+    const result = await prisma.post.findMany();
+    console.log("Posts table data:", result);
+  } catch (error) {
+    console.error("Error querying posts table:", error);
+  }
+}
+
+export default prisma;

@@ -8,9 +8,7 @@ import PostsList from "@/components/dashboard/posts-list";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { db } from "@/lib/db";
-import { posts as postsTable } from "@/lib/db/schema";
-import { eq, InferModel } from "drizzle-orm";
+import prisma from "@/lib/db";
 
 export default async function PostsPage() {
   const session = await getServerSession(authOptions);
@@ -19,45 +17,19 @@ export default async function PostsPage() {
     redirect("/login?callbackUrl=/dashboard/posts");
   }
 
-  // Update the posts query to include all required fields
-  const posts: InferModel<typeof postsTable>[] = await db
-    .select({
-      id: postsTable.id,
-      slug: postsTable.slug,
-      createdAt: postsTable.createdAt,
-      updatedAt: postsTable.updatedAt,
-      title: postsTable.title,
-      content: postsTable.content,
-      excerpt: postsTable.excerpt ?? "", // Ensure excerpt is a string
-      featuredImage: postsTable.featuredImage,
-      status: postsTable.status,
-      publishedAt: postsTable.publishedAt,
-      isFeatured: postsTable.isFeatured,
-      metaDescription: postsTable.metaDescription,
-      metaKeywords: postsTable.metaKeywords,
-      locale: postsTable.locale,
-      authorId: postsTable.authorId,
-    })
-    .from(postsTable)
-    .where(eq(postsTable.authorId, session.user.id));
+  const posts = await prisma.post.findMany({
+    where: { authorId: session.user.id },
+    orderBy: { createdAt: "desc" },
+  });
 
-  // Map posts to ensure `excerpt` is always a string
-  const formattedPosts = posts.map((post) => ({
+  const normalizedPosts = posts.map((post) => ({
     ...post,
-    excerpt: post.excerpt ?? "", // Default to an empty string if null
+    excerpt: post.excerpt ?? "",
+    status: post.status as "PUBLISHED" | "DRAFT",
+    featuredImage: post.featuredImage
+      ? post.featuredImage
+      : "/default-image.jpg",
   }));
-
-  // Filter out posts with the "ARCHIVED" status
-  const filteredPosts = formattedPosts.filter(
-    (post) => post.status !== "ARCHIVED"
-  );
-
-  // Explicitly cast filteredPosts to the expected type
-  const typedPosts = filteredPosts as Array<
-    Omit<(typeof filteredPosts)[number], "status"> & {
-      status: "DRAFT" | "PUBLISHED";
-    }
-  >;
 
   return (
     <DashboardShell>
@@ -72,7 +44,7 @@ export default async function PostsPage() {
           </Button>
         </DashboardHeader>
 
-        <PostsList posts={typedPosts} />
+        <PostsList posts={normalizedPosts} />
       </div>
     </DashboardShell>
   );

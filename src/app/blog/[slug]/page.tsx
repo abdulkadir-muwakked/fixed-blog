@@ -2,11 +2,18 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Clock, Share2, MessageSquare, ChevronLeft, Facebook, Twitter, Linkedin } from "lucide-react";
 import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+  CalendarDays,
+  Clock,
+  Share2,
+  MessageSquare,
+  ChevronLeft,
+  Facebook,
+  Twitter,
+  Linkedin,
+} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import prisma from "@/lib/db";
 
 // Mock blog post data
 const posts = [
@@ -82,7 +89,8 @@ export default async function Page() {
       <p>Next.js 14 is a powerful framework for building modern web applications with React. It offers improved performance, developer experience, and new features that make it easier to build fast, responsive applications. Whether you're building a simple blog or a complex web application, Next.js 14 has the tools and features you need to succeed.</p>
     `,
     slug: "getting-started-with-nextjs-14",
-    featuredImage: "https://images.unsplash.com/photo-1587620962725-abab7fe55159",
+    featuredImage:
+      "https://images.unsplash.com/photo-1587620962725-abab7fe55159",
     publishedAt: new Date("2023-10-15"),
     readingTime: "8 min read",
     author: {
@@ -99,7 +107,8 @@ export default async function Page() {
           name: "Alice Johnson",
           image: "https://randomuser.me/api/portraits/women/23.jpg",
         },
-        content: "Great article! I've been looking to get started with Next.js 14, and this provides a clear introduction.",
+        content:
+          "Great article! I've been looking to get started with Next.js 14, and this provides a clear introduction.",
         createdAt: new Date("2023-10-16T08:30:00"),
       },
       {
@@ -108,7 +117,8 @@ export default async function Page() {
           name: "Bob Smith",
           image: "https://randomuser.me/api/portraits/men/45.jpg",
         },
-        content: "I'm curious about how Server Components work with third-party libraries. Have you run into any compatibility issues?",
+        content:
+          "I'm curious about how Server Components work with third-party libraries. Have you run into any compatibility issues?",
         createdAt: new Date("2023-10-16T10:15:00"),
       },
     ],
@@ -119,7 +129,8 @@ export default async function Page() {
     excerpt:
       "Discover how to use Tailwind CSS to create beautiful user interfaces quickly.",
     slug: "styling-with-tailwind-css",
-    featuredImage: "https://images.unsplash.com/photo-1517180102446-f3ece451e9d8",
+    featuredImage:
+      "https://images.unsplash.com/photo-1517180102446-f3ece451e9d8",
     publishedAt: new Date("2023-10-10"),
     author: {
       name: "Jane Smith",
@@ -133,7 +144,8 @@ export default async function Page() {
     excerpt:
       "Create a powerful blog using Markdown for content and Next.js for delivery.",
     slug: "blog-with-markdown-nextjs",
-    featuredImage: "https://images.unsplash.com/photo-1499750310107-5fef28a66643",
+    featuredImage:
+      "https://images.unsplash.com/photo-1499750310107-5fef28a66643",
     publishedAt: new Date("2023-09-28"),
     author: {
       name: "Alex Johnson",
@@ -143,7 +155,11 @@ export default async function Page() {
   },
 ];
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const posts = await prisma.post.findMany({
+    select: { slug: true },
+  });
+
   return posts.map((post) => ({
     slug: post.slug,
   }));
@@ -158,7 +174,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
 
   // Get related posts
   const relatedPosts = post.relatedPosts
-    ? posts.filter(p => post.relatedPosts?.includes(p.id))
+    ? posts.filter((p) => post.relatedPosts?.includes(p.id))
     : [];
 
   return (
@@ -166,8 +182,8 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
       {/* Hero Section */}
       <div className="relative h-[40vh] overflow-hidden">
         <Image
-          src={`${post.featuredImage}?w=1920&h=600&fit=crop`}
-          alt={post.title}
+          src={post.featuredImage || "/default-image.jpg"}
+          alt={post.title || "Default Title"}
           fill
           className="object-cover"
           priority
@@ -200,7 +216,9 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         {/* Post card */}
         <Card className="p-8 shadow-lg">
           <CardContent className="p-0">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">{post.title}</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-4">
+              {post.title}
+            </h1>
 
             {/* Author and metadata */}
             <div className="flex items-center justify-between flex-wrap mb-8 pb-6 border-b">
@@ -216,7 +234,9 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                 <div>
                   <div className="font-medium">{post.author.name}</div>
                   {post.author.bio && (
-                    <div className="text-sm text-muted-foreground">{post.author.bio}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {post.author.bio}
+                    </div>
                   )}
                 </div>
               </div>
@@ -244,20 +264,36 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             {/* Post content */}
             <div
               className="prose prose-zinc dark:prose-invert max-w-none mb-8"
-              dangerouslySetInnerHTML={{ __html: post.content }}
+              dangerouslySetInnerHTML={{
+                __html: post.content || "<p>No content available.</p>",
+              }}
             />
 
             {/* Share buttons */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-t pt-6 mt-8">
-              <div className="text-sm font-medium mb-4 sm:mb-0">Share this article</div>
+              <div className="text-sm font-medium mb-4 sm:mb-0">
+                Share this article
+              </div>
               <div className="flex gap-2">
-                <Button size="icon" variant="outline" aria-label="Share on Facebook">
+                <Button
+                  size="icon"
+                  variant="outline"
+                  aria-label="Share on Facebook"
+                >
                   <Facebook className="h-4 w-4" />
                 </Button>
-                <Button size="icon" variant="outline" aria-label="Share on Twitter">
+                <Button
+                  size="icon"
+                  variant="outline"
+                  aria-label="Share on Twitter"
+                >
                   <Twitter className="h-4 w-4" />
                 </Button>
-                <Button size="icon" variant="outline" aria-label="Share on LinkedIn">
+                <Button
+                  size="icon"
+                  variant="outline"
+                  aria-label="Share on LinkedIn"
+                >
                   <Linkedin className="h-4 w-4" />
                 </Button>
                 <Button size="icon" variant="outline" aria-label="Copy link">
@@ -292,11 +328,14 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                       {relatedPost.title}
                     </h3>
                     <div className="text-sm text-muted-foreground mt-1">
-                      {new Date(relatedPost.publishedAt).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
+                      {new Date(relatedPost.publishedAt).toLocaleDateString(
+                        "en-US",
+                        {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        }
+                      )}
                     </div>
                   </div>
                 </Link>
@@ -310,7 +349,9 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
           <div className="mt-12">
             <div className="flex items-center gap-2 mb-6">
               <h2 className="text-2xl font-bold">Comments</h2>
-              <span className="text-muted-foreground">({post.comments.length})</span>
+              <span className="text-muted-foreground">
+                ({post.comments.length})
+              </span>
             </div>
 
             <div className="space-y-6">
@@ -328,11 +369,14 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                     <div className="flex justify-between items-start">
                       <div className="font-medium">{comment.author.name}</div>
                       <div className="text-xs text-muted-foreground">
-                        {new Date(comment.createdAt).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
+                        {new Date(comment.createdAt).toLocaleDateString(
+                          "en-US",
+                          {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          }
+                        )}
                       </div>
                     </div>
                     <p className="mt-2 text-sm">{comment.content}</p>
@@ -347,7 +391,12 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               <form className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium mb-1">Name</label>
+                    <label
+                      htmlFor="name"
+                      className="block text-sm font-medium mb-1"
+                    >
+                      Name
+                    </label>
                     <input
                       type="text"
                       id="name"
@@ -356,7 +405,12 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                     />
                   </div>
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium mb-1">Email</label>
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium mb-1"
+                    >
+                      Email
+                    </label>
                     <input
                       type="email"
                       id="email"
@@ -366,7 +420,12 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="comment" className="block text-sm font-medium mb-1">Comment</label>
+                  <label
+                    htmlFor="comment"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Comment
+                  </label>
                   <textarea
                     id="comment"
                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[120px]"

@@ -10,7 +10,7 @@
     "static/chunks/node_modules_@tiptap_core_dist_index_bbf02861.js",
     "static/chunks/node_modules_@popperjs_core_lib_e7041586._.js",
     "static/chunks/node_modules_@radix-ui_react-icons_dist_react-icons_esm_ecd85ef9.js",
-    "static/chunks/node_modules_b517c0c0._.js"
+    "static/chunks/node_modules_2ba739cf._.js"
   ],
   "source": "dynamic"
 });

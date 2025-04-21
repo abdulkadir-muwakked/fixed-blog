@@ -138,7 +138,9 @@ export default function AdminsPage() {
       fetchAdmins();
     } catch (error) {
       console.error("Error creating admin:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to create admin user");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to create admin user"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -200,17 +202,24 @@ export default function AdminsPage() {
                 <TableBody>
                   {admins.map((admin) => (
                     <TableRow key={admin.id}>
-                      <TableCell className="font-medium flex items-center">
-                        <Avatar className="h-8 w-8 mr-2">
-                          <AvatarImage src={admin.image || ""} alt={admin.name} />
-                          <AvatarFallback>{getInitials(admin.name)}</AvatarFallback>
-                        </Avatar>
-                        {admin.name}
-                        {admin.id === session?.user.id && (
-                          <span className="ml-2 text-xs bg-primary/10 text-primary rounded-full px-2 py-0.5">
-                            You
-                          </span>
-                        )}
+                      <TableCell>
+                        <div className="font-medium flex items-center">
+                          <Avatar className="h-8 w-8 mr-2">
+                            <AvatarImage
+                              src={admin.image || ""}
+                              alt={admin.name}
+                            />
+                            <AvatarFallback>
+                              {getInitials(admin.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                          {admin.name}
+                          {admin.id === session?.user.id && (
+                            <span className="ml-2 text-xs bg-primary/10 text-primary rounded-full px-2 py-0.5">
+                              You
+                            </span>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>{admin.email}</TableCell>
                       <TableCell>
@@ -290,7 +299,12 @@ export default function AdminsPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setShowAddAdminDialog(false)} disabled={isSubmitting}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowAddAdminDialog(false)}
+                disabled={isSubmitting}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>

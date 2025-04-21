@@ -2,138 +2,72 @@
  * @File: src/lib/auth/service.ts
  */
 
+import prisma from "../db";
 import bcrypt from "bcryptjs";
-import { db } from "../db";
-import { users } from "../db/schema";
-import { createId } from "../utils";
-import { eq } from "drizzle-orm";
-import type { InferInsertModel } from "drizzle-orm";
+import { z } from "zod";
 
-export type RegisterUserData = {
+export async function registerUser(data: {
   name: string;
   email: string;
   password: string;
-  role?: "USER" | "ADMIN"; // Add role as an optional parameter
-};
+}) {
+  const hashedPassword = await bcrypt.hash(data.password, 10);
 
-export type UpdateUserData = {
-  name?: string;
-  email?: string;
-  password?: string;
-  image?: string;
-};
-
-export async function registerUser(userData: RegisterUserData) {
-  // Check if user already exists
-  const existingUser = await db
-    .select()
-    .from(users)
-    .where(eq(users.email, userData.email))
-    .then((res) => res[0]);
-
-  if (existingUser) {
-    throw new Error("User already exists");
-  }
-
-  // Hash password
-  const hashedPassword = await bcrypt.hash(userData.password, 10);
-
-  // Create user
-  await db.insert(users).values({
-    id: createId(),
-    name: userData.name,
-    email: userData.email,
-    password: hashedPassword,
-    role: userData.role || "USER", // Use the provided role or default to USER
-    createdAt: new Date(),
-    updatedAt: new Date(),
+  const newUser = await prisma.user.create({
+    data: {
+      name: data.name,
+      email: data.email,
+      password: hashedPassword,
+    },
   });
 
-  return { success: true };
-}
-
-export async function updateUser(userId: string, userData: UpdateUserData) {
-  const updateData: Partial<InferInsertModel<typeof users>> = {
-    updatedAt: new Date(),
-  };
-
-  if (userData.name) updateData.name = userData.name;
-  if (userData.email) updateData.email = userData.email;
-  if (userData.image) updateData.image = userData.image;
-
-  if (userData.password) {
-    updateData.password = await bcrypt.hash(userData.password, 10);
-  }
-
-  await db.update(users).set(updateData).where(eq(users.id, userId));
-  return { success: true };
-}
-
-export async function getUser(userId: string) {
-  const user = await db
-    .select({
-      id: users.id,
-      name: users.name,
-      email: users.email,
-      image: users.image,
-      role: users.role,
-      createdAt: users.createdAt,
-    })
-    .from(users)
-    .where(eq(users.id, userId))
-    .then((res) => res[0] || null);
-
-  return user;
+  return newUser;
 }
 
 export async function getUserByEmail(email: string) {
-  const user = await db
-    .select({
-      id: users.id,
-      name: users.name,
-      email: users.email,
-      image: users.image,
-      role: users.role,
-      createdAt: users.createdAt,
-    })
-    .from(users)
-    .where(eq(users.email, email))
-    .then((res) => res[0] || null);
-
+  const user = await prisma.user.findUnique({ where: { email } });
   return user;
 }
 
-export async function makeUserAdmin(userId: string) {
-  await db.update(users).set({ role: "ADMIN" }).where(eq(users.id, userId));
-  return { success: true };
+export async function updateUser(
+  userId: string,
+  data: { name?: string; email?: string; password?: string }
+) {
+  const updateData: Partial<{ name: string; email: string; password: string }> =
+    {};
+
+  if (data.name) updateData.name = data.name;
+  if (data.email) updateData.email = data.email;
+  if (data.password) updateData.password = await bcrypt.hash(data.password, 10);
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: updateData,
+  });
+  return updatedUser;
 }
 
-// Add function to create first admin user (for initial setup)
-export async function createRootAdmin(userData: RegisterUserData) {
-  // Check if any admin user already exists
-  const existingAdmin = await db
-    .select()
-    .from(users)
-    .where(eq(users.role, "ADMIN"))
-    .then((res) => res[0]);
+export async function createRootAdmin(data: {
+  name: string;
+  email: string;
+  password: string;
+}) {
+  const adminExists = await prisma.user.findFirst({ where: { role: "ADMIN" } });
 
-  if (existingAdmin) {
+  if (adminExists) {
     throw new Error("Root admin already exists");
   }
 
-  // Hash password
-  const hashedPassword = await bcrypt.hash(userData.password, 10);
+  const hashedPassword = await bcrypt.hash(data.password, 10);
 
-  // Create admin user
-  await db.insert(users).values({
-    id: createId(),
-    name: userData.name,
-    email: userData.email,
-    password: hashedPassword,
-    role: "ADMIN",
-    createdAt: new Date(),
-    updatedAt: new Date(),
+  const admin = await prisma.user.create({
+    data: {
+      name: data.name,
+      email: data.email,
+      password: hashedPassword,
+      role: "ADMIN",
+    },
   });
 
-  return { success: true };
+  return admin;
 }

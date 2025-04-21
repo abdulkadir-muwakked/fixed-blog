@@ -424,15 +424,24 @@ function PostsList({ posts }) {
     _s();
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"])();
     const [selectedFilter, setSelectedFilter] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("ALL");
+    console.log("Posts received in PostsList:", posts);
     const filteredPosts = posts.filter((post)=>{
         if (selectedFilter === "ALL") return true;
         return post.status === selectedFilter;
     });
     const deletePost = async (id)=>{
-        // In a real app, you would call an API to delete the post
-        console.log(`Deleting post with id: ${id}`);
-        // Then refresh the data
-        router.refresh();
+        try {
+            const response = await fetch(`/api/posts?id=${id}`, {
+                method: "DELETE"
+            });
+            if (!response.ok) {
+                throw new Error("Failed to delete post");
+            }
+            // Refresh the page after successful deletion
+            router.refresh();
+        } catch (error) {
+            console.error("Error deleting post:", error);
+        }
     };
     const publishPost = async (id)=>{
         // In a real app, you would call an API to publish the post
@@ -457,7 +466,7 @@ function PostsList({ posts }) {
                         children: "Your Posts"
                     }, void 0, false, {
                         fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                        lineNumber: 80,
+                        lineNumber: 94,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -472,14 +481,14 @@ function PostsList({ posts }) {
                                         className: "mr-2 h-4 w-4"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                        lineNumber: 87,
+                                        lineNumber: 101,
                                         columnNumber: 13
                                     }, this),
                                     "All"
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                lineNumber: 82,
+                                lineNumber: 96,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -491,14 +500,14 @@ function PostsList({ posts }) {
                                         className: "mr-2 h-4 w-4"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                        lineNumber: 95,
+                                        lineNumber: 109,
                                         columnNumber: 13
                                     }, this),
                                     "Published"
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                lineNumber: 90,
+                                lineNumber: 104,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -510,14 +519,14 @@ function PostsList({ posts }) {
                                         className: "mr-2 h-4 w-4"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                        lineNumber: 103,
+                                        lineNumber: 117,
                                         columnNumber: 13
                                     }, this),
                                     "Drafts"
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                lineNumber: 98,
+                                lineNumber: 112,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -530,31 +539,31 @@ function PostsList({ posts }) {
                                             className: "mr-2 h-4 w-4"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                            lineNumber: 108,
+                                            lineNumber: 122,
                                             columnNumber: 15
                                         }, this),
                                         "New Post"
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                    lineNumber: 107,
+                                    lineNumber: 121,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                lineNumber: 106,
+                                lineNumber: 120,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                        lineNumber: 81,
+                        lineNumber: 95,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                lineNumber: 79,
+                lineNumber: 93,
                 columnNumber: 7
             }, this),
             filteredPosts.length === 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
@@ -568,7 +577,7 @@ function PostsList({ posts }) {
                                 children: "No posts found."
                             }, void 0, false, {
                                 fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                lineNumber: 119,
+                                lineNumber: 133,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -581,35 +590,35 @@ function PostsList({ posts }) {
                                             className: "mr-2 h-4 w-4"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                            lineNumber: 122,
+                                            lineNumber: 136,
                                             columnNumber: 19
                                         }, this),
                                         "Create your first post"
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                    lineNumber: 121,
+                                    lineNumber: 135,
                                     columnNumber: 17
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                lineNumber: 120,
+                                lineNumber: 134,
                                 columnNumber: 15
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                        lineNumber: 118,
+                        lineNumber: 132,
                         columnNumber: 13
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                    lineNumber: 117,
+                    lineNumber: 131,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                lineNumber: 116,
+                lineNumber: 130,
                 columnNumber: 9
             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "grid gap-4",
@@ -626,7 +635,7 @@ function PostsList({ posts }) {
                                                 children: post.title
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                lineNumber: 135,
+                                                lineNumber: 149,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -637,7 +646,7 @@ function PostsList({ posts }) {
                                                         children: post.status === "PUBLISHED" ? "Published" : "Draft"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                        lineNumber: 137,
+                                                        lineNumber: 153,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenu"], {
@@ -653,7 +662,7 @@ function PostsList({ posts }) {
                                                                             className: "h-4 w-4"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                            lineNumber: 149,
+                                                                            lineNumber: 169,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -661,18 +670,18 @@ function PostsList({ posts }) {
                                                                             children: "Open menu"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                            lineNumber: 150,
+                                                                            lineNumber: 170,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                    lineNumber: 148,
+                                                                    lineNumber: 164,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                lineNumber: 147,
+                                                                lineNumber: 163,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenuContent"], {
@@ -682,12 +691,12 @@ function PostsList({ posts }) {
                                                                         children: "Actions"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                        lineNumber: 154,
+                                                                        lineNumber: 174,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenuSeparator"], {}, void 0, false, {
                                                                         fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                        lineNumber: 155,
+                                                                        lineNumber: 175,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenuItem"], {
@@ -699,25 +708,25 @@ function PostsList({ posts }) {
                                                                                     className: "mr-2 h-4 w-4"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                                    lineNumber: 158,
+                                                                                    lineNumber: 178,
                                                                                     columnNumber: 29
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                                     children: "Edit"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                                    lineNumber: 159,
+                                                                                    lineNumber: 179,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                            lineNumber: 157,
+                                                                            lineNumber: 177,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                        lineNumber: 156,
+                                                                        lineNumber: 176,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenuItem"], {
@@ -730,25 +739,25 @@ function PostsList({ posts }) {
                                                                                     className: "mr-2 h-4 w-4"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                                    lineNumber: 164,
+                                                                                    lineNumber: 184,
                                                                                     columnNumber: 29
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                                     children: "View"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                                    lineNumber: 165,
+                                                                                    lineNumber: 185,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                            lineNumber: 163,
+                                                                            lineNumber: 183,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                        lineNumber: 162,
+                                                                        lineNumber: 182,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     post.status === "DRAFT" ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenuItem"], {
@@ -758,20 +767,20 @@ function PostsList({ posts }) {
                                                                                 className: "mr-2 h-4 w-4"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                                lineNumber: 170,
+                                                                                lineNumber: 192,
                                                                                 columnNumber: 29
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                                 children: "Publish"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                                lineNumber: 171,
+                                                                                lineNumber: 193,
                                                                                 columnNumber: 29
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                        lineNumber: 169,
+                                                                        lineNumber: 189,
                                                                         columnNumber: 27
                                                                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenuItem"], {
                                                                         onClick: ()=>unpublishPost(post.id),
@@ -780,25 +789,25 @@ function PostsList({ posts }) {
                                                                                 className: "mr-2 h-4 w-4"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                                lineNumber: 175,
+                                                                                lineNumber: 199,
                                                                                 columnNumber: 29
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                                 children: "Unpublish"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                                lineNumber: 176,
+                                                                                lineNumber: 200,
                                                                                 columnNumber: 29
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                        lineNumber: 174,
+                                                                        lineNumber: 196,
                                                                         columnNumber: 27
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenuSeparator"], {}, void 0, false, {
                                                                         fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                        lineNumber: 179,
+                                                                        lineNumber: 203,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenuItem"], {
@@ -809,44 +818,44 @@ function PostsList({ posts }) {
                                                                                 className: "mr-2 h-4 w-4"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                                lineNumber: 184,
+                                                                                lineNumber: 208,
                                                                                 columnNumber: 27
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                                 children: "Delete"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                                lineNumber: 185,
+                                                                                lineNumber: 209,
                                                                                 columnNumber: 27
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                        lineNumber: 180,
+                                                                        lineNumber: 204,
                                                                         columnNumber: 25
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                                lineNumber: 153,
+                                                                lineNumber: 173,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                        lineNumber: 146,
+                                                        lineNumber: 162,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                lineNumber: 136,
+                                                lineNumber: 152,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                        lineNumber: 134,
+                                        lineNumber: 148,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardDescription"], {
@@ -854,13 +863,13 @@ function PostsList({ posts }) {
                                         children: post.excerpt
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                        lineNumber: 191,
+                                        lineNumber: 215,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                lineNumber: 133,
+                                lineNumber: 147,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardFooter"], {
@@ -875,48 +884,48 @@ function PostsList({ posts }) {
                                                     children: post.slug
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                                    lineNumber: 197,
-                                                    columnNumber: 30
+                                                    lineNumber: 222,
+                                                    columnNumber: 27
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                            lineNumber: 197,
+                                            lineNumber: 221,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                             children: post.publishedAt ? `Published: ${post.publishedAt.toLocaleDateString()}` : "Not published yet"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                            lineNumber: 198,
+                                            lineNumber: 224,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                    lineNumber: 196,
+                                    lineNumber: 220,
                                     columnNumber: 17
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                                lineNumber: 195,
+                                lineNumber: 219,
                                 columnNumber: 15
                             }, this)
                         ]
                     }, post.id, true, {
                         fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                        lineNumber: 132,
+                        lineNumber: 146,
                         columnNumber: 13
                     }, this))
             }, void 0, false, {
                 fileName: "[project]/src/components/dashboard/posts-list.tsx",
-                lineNumber: 130,
+                lineNumber: 144,
                 columnNumber: 9
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/dashboard/posts-list.tsx",
-        lineNumber: 78,
+        lineNumber: 92,
         columnNumber: 5
     }, this);
 }

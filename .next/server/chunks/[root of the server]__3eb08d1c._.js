@@ -468,7 +468,9 @@ var { g: global, __dirname } = __turbopack_context__;
  * @File: src/lib/db/index.ts
  */ __turbopack_context__.s({
     "db": (()=>db),
-    "fetchCategories": (()=>fetchCategories)
+    "fetchCategories": (()=>fetchCategories),
+    "testPostsTable": (()=>testPostsTable),
+    "verifyPostsTable": (()=>verifyPostsTable)
 });
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$drizzle$2d$orm$2f$better$2d$sqlite3$2f$driver$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/drizzle-orm/better-sqlite3/driver.js [app-route] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$externals$5d2f$better$2d$sqlite3__$5b$external$5d$__$28$better$2d$sqlite3$2c$__cjs$29$__ = __turbopack_context__.i("[externals]/better-sqlite3 [external] (better-sqlite3, cjs)");
@@ -512,6 +514,24 @@ async function fetchCategories() {
     const result = await db.select().from(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2f$schema$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["categories"]);
     console.log("Fetched categories:", result);
     return result;
+}
+async function testPostsTable() {
+    try {
+        console.log("Testing posts table...");
+        const result = await db.select().from(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2f$schema$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["posts"]);
+        console.log("Posts table data:", result);
+    } catch (error) {
+        console.error("Error querying posts table:", error);
+    }
+}
+async function verifyPostsTable() {
+    try {
+        console.log("Verifying posts table...");
+        const result = await db.select().from(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2f$schema$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["posts"]);
+        console.log("Posts table data:", result);
+    } catch (error) {
+        console.error("Error querying posts table:", error);
+    }
 }
 }}),
 "[project]/src/lib/auth/drizzle-adapter.ts [app-route] (ecmascript)": ((__turbopack_context__) => {
@@ -704,28 +724,20 @@ const authOptions = {
                 }
             },
             async authorize (credentials) {
-                if (credentials?.email === "test@example.com") {
-                    return {
-                        id: "test-user",
-                        email: "test@example.com",
-                        name: "Test User",
-                        role: "ADMIN"
-                    };
-                }
                 try {
                     if (!credentials?.email || !credentials?.password) {
-                        throw new Error('Email and password are required');
+                        throw new Error("Email and password are required");
                     }
                     const user = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2f$index$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["db"].select().from(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2f$schema$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["users"]).where((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$drizzle$2d$orm$2f$sql$2f$expressions$2f$conditions$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["eq"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2f$schema$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["users"].email, credentials.email)).then((res)=>res[0]);
                     if (!user) {
-                        throw new Error('User not found');
+                        throw new Error("User not found");
                     }
                     if (!user.password) {
-                        throw new Error('User registered with OAuth');
+                        throw new Error("User registered with OAuth");
                     }
                     const isValid = await __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$bcryptjs$2f$index$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"].compare(credentials.password, user.password);
                     if (!isValid) {
-                        throw new Error('Invalid password');
+                        throw new Error("Invalid password");
                     }
                     return {
                         id: user.id,
