@@ -2,9 +2,7 @@
  * @File: src/app/api/media/route.ts
  */
 
-import { db } from "@/lib/db";
-import { media } from "@/lib/db/schema";
-import { desc } from "drizzle-orm";
+import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth/config";
@@ -23,20 +21,22 @@ export async function GET() {
     }
 
     // Fetch all media items, sorted by creation date
-    const mediaItems = await db
-      .select({
-        id: media.id,
-        filename: media.filename,
-        url: media.url,
-        thumbnailUrl: media.thumbnailUrl,
-        size: media.size,
-        width: media.width,
-        height: media.height,
-        type: media.type,
-        createdAt: media.createdAt,
-      })
-      .from(media)
-      .orderBy(desc(media.createdAt));
+    const mediaItems = await prisma.media.findMany({
+      select: {
+        id: true,
+        filename: true,
+        url: true,
+        thumbnailUrl: true,
+        size: true,
+        width: true,
+        height: true,
+        type: true,
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
 
     return NextResponse.json({ media: mediaItems });
   } catch (error) {

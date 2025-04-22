@@ -63,6 +63,7 @@ export default function PostForm({ post, categories }: PostFormProps) {
   const [categoryId, setCategoryId] = useState(post?.categoryId || "");
   const [status, setStatus] = useState(post?.status || "PUBLISHED");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [photo, setPhoto] = useState<File | null>(null); // Added state for photo
 
   // Editor
   const editor = useEditor({
@@ -132,25 +133,24 @@ export default function PostForm({ post, categories }: PostFormProps) {
       setIsSubmitting(true);
 
       // Post data
-      const formData = {
-        id: post?.id,
-        title,
-        content: editor?.getHTML(),
-        excerpt,
-        slug,
-        categoryId, // Ensure categoryId is included
-        status: status || "PUBLISHED", // Ensure status is included
-      };
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("content", editor?.getHTML() || "");
+      formData.append("excerpt", excerpt);
+      formData.append("slug", slug);
+      formData.append("categoryId", categoryId);
+      formData.append("status", status);
+
+      if (photo) {
+        formData.append("photo", photo); // Append the photo file to the form data
+      }
 
       console.log("Form data:", formData);
 
       // Send form data to the API
       const response = await fetch("/api/posts", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+        body: formData,
       });
 
       if (!response.ok) {
@@ -256,6 +256,16 @@ export default function PostForm({ post, categories }: PostFormProps) {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="photo">Photo</Label>
+        <Input
+          id="photo"
+          type="file"
+          accept="image/*"
+          onChange={(e) => setPhoto(e.target.files?.[0] || null)}
+        />
       </div>
 
       <div className="flex justify-end gap-3">

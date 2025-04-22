@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 
-
-const nextConfig = { 
+const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -28,7 +27,7 @@ const nextConfig = {
         hostname: "randomuser.me",
       },
     ],
-  }
+  },
 };
 
-export default (nextConfig);
+export default nextConfig;

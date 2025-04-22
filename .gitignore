@@ -1,4 +1,29 @@
+# Ignore node_modules directory
 /node_modules
-/prisma
+
+# Ignore Prisma generated files
+/prisma/dev.db
+/prisma/migrations/
+/prisma/seed.ts
+
+# Ignore data files
 /data
+
+# Ignore scripts
 /scripts
+
+# Ignore build artifacts
+/.next
+/dist
+
+# Ignore environment files
+.env
+.env.local
+
+# Ignore lock files
+bun.lock
+yarn.lock
+package-lock.json
+
+# Ignore TypeScript build info
+/tsconfig.tsbuildinfo
