@@ -192,13 +192,13 @@ export default function AdminsPage() {
           ) : (
             <div className="rounded-md border">
               <Table>
-                <TableHeader>
+                <TableHead>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Added On</TableHead>
+                    <TableHeader>Name</TableHeader>
+                    <TableHeader>Email</TableHeader>
+                    <TableHeader>Added On</TableHeader>
                   </TableRow>
-                </TableHeader>
+                </TableHead>
                 <TableBody>
                   {admins.map((admin) => (
                     <TableRow key={admin.id}>

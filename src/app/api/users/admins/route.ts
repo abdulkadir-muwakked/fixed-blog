@@ -2,8 +2,7 @@
  * @File: src/app/api/users/admins/route.ts
  */
 
-import { db } from "@/lib/db";
-import { users } from "@/lib/db/schema";
+import prisma from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
@@ -12,17 +11,9 @@ import { authOptions } from "@/lib/auth/config";
 export async function GET() {
   try {
     // Fetch all admin users directly from the database
-    const adminUsers = await db
-      .select({
-        id: users.id,
-        name: users.name,
-        email: users.email,
-        image: users.image,
-        createdAt: users.createdAt,
-      })
-      .from(users)
-      .where(eq(users.role, "ADMIN"))
-      .orderBy(users.createdAt);
+    const adminUsers = await prisma.user.findMany({
+      where: { role: "ADMIN" },
+    });
 
     if (adminUsers.length === 0) {
       return NextResponse.json(
@@ -50,17 +41,11 @@ export async function POST(req: Request) {
     }
 
     // Check if the user exists in the database
-    const user = await db
-      .select({
-        id: users.id,
-        email: users.email,
-        role: users.role,
-      })
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1);
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
 
-    if (user.length === 0) {
+    if (!user) {
       return NextResponse.json({ exists: false });
     }
 

@@ -2,8 +2,8 @@
  * @File: src/app/api/settings/route.ts
  */
 
-import { db } from "@/lib/db";
-import { siteSettings } from "@/lib/db/schema";
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 import { eq } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
@@ -27,7 +27,7 @@ const settingsSchema = z.object({
 });
 
 // Get settings
-export async function GET() {
+export async function GET(req: NextRequest, res: NextResponse) {
   try {
     // Check if the user is authenticated and an admin for write operations
     const session = await getServerSession(authOptions);
@@ -40,11 +40,7 @@ export async function GET() {
     }
 
     // Fetch current settings
-    const currentSettings = await db
-      .select()
-      .from(siteSettings)
-      .limit(1)
-      .then((res) => res[0] || null);
+    const currentSettings = await prisma.siteSetting.findFirst();
 
     // If no settings exist and this is an admin, create default settings
     if (!currentSettings && session?.user.role === "ADMIN") {
@@ -56,11 +52,23 @@ export async function GET() {
         updatedAt: new Date(),
       };
 
-      await db.insert(siteSettings).values(newSettings);
+      await prisma.siteSetting.create({
+        data: newSettings,
+      });
       return NextResponse.json({ settings: newSettings });
     }
 
-    return NextResponse.json({ settings: currentSettings });
+    // Ensure social media links are included in the GET response
+    return NextResponse.json({
+      settings: {
+        ...currentSettings,
+        socialFacebook: currentSettings?.socialFacebook || "",
+        socialTwitter: currentSettings?.socialTwitter || "",
+        socialInstagram: currentSettings?.socialInstagram || "",
+        socialLinkedIn: currentSettings?.socialLinkedIn || "",
+        socialGithub: currentSettings?.socialGithub || "",
+      },
+    });
   } catch (error) {
     console.error("Error fetching settings:", error);
     return NextResponse.json(
@@ -71,7 +79,7 @@ export async function GET() {
 }
 
 // Update settings
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest, res: NextResponse) {
   try {
     // Check if the user is authenticated and an admin
     const session = await getServerSession(authOptions);
@@ -99,17 +107,13 @@ export async function POST(req: NextRequest) {
     const settingsData = result.data;
 
     // Check if settings exist
-    const currentSettings = await db
-      .select()
-      .from(siteSettings)
-      .limit(1)
-      .then((res) => res[0] || null);
+    const currentSettings = await prisma.siteSetting.findFirst();
 
     if (currentSettings) {
       // Update existing settings
-      await db
-        .update(siteSettings)
-        .set({
+      await prisma.siteSetting.update({
+        where: { id: currentSettings.id },
+        data: {
           title: settingsData.title,
           description: settingsData.description ?? "",
           logo: settingsData.logo,
@@ -121,24 +125,26 @@ export async function POST(req: NextRequest) {
           socialGithub: settingsData.socialGithub,
           footerText: settingsData.footerText,
           updatedAt: new Date(),
-        })
-        .where(eq(siteSettings.id, currentSettings.id));
+        },
+      });
     } else {
       // Create new settings if they don't exist
-      await db.insert(siteSettings).values({
-        id: createId(),
-        title: settingsData.title,
-        description: settingsData.description ?? "",
-        logo: settingsData.logo,
-        favicon: settingsData.favicon,
-        socialFacebook: settingsData.socialFacebook,
-        socialTwitter: settingsData.socialTwitter,
-        socialInstagram: settingsData.socialInstagram,
-        socialLinkedIn: settingsData.socialLinkedIn,
-        socialGithub: settingsData.socialGithub,
-        footerText: settingsData.footerText,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+      await prisma.siteSetting.create({
+        data: {
+          id: createId(),
+          title: settingsData.title,
+          description: settingsData.description ?? "",
+          logo: settingsData.logo,
+          favicon: settingsData.favicon,
+          socialFacebook: settingsData.socialFacebook,
+          socialTwitter: settingsData.socialTwitter,
+          socialInstagram: settingsData.socialInstagram,
+          socialLinkedIn: settingsData.socialLinkedIn,
+          socialGithub: settingsData.socialGithub,
+          footerText: settingsData.footerText,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       });
     }
 
