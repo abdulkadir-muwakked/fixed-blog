@@ -31,17 +31,31 @@ type SiteSettings = {
   socialLinkedIn: string | null;
   socialGithub: string | null;
   footerText: string | null;
+  contactEmail: string | null;
+  contactPhone: string | null;
 };
+
+// Define types for banners
+interface Banner {
+  id: string;
+  title: string;
+  imageUrl: string;
+  link?: string;
+}
 
 export default function SettingsPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [footerContent, setFooterContent] = useState("");
+  const [navbarLinks, setNavbarLinks] = useState("[]");
+  const [banners, setBanners] = useState<Banner[]>([]);
 
   // Load settings on component mount
   useEffect(() => {
     fetchSettings();
+    fetchData();
   }, []);
 
   const fetchSettings = async () => {
@@ -63,7 +77,23 @@ export default function SettingsPage() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const fetchData = async () => {
+    const footerRes = await fetch("/api/settings/footer");
+    const footerData = await footerRes.json();
+    setFooterContent(footerData?.content || "");
+
+    const navbarRes = await fetch("/api/settings/navbar");
+    const navbarData = await navbarRes.json();
+    setNavbarLinks(JSON.stringify(navbarData?.links || []));
+
+    const bannersRes = await fetch("/api/settings/banners");
+    const bannersData = await bannersRes.json();
+    setBanners(bannersData || []);
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     if (settings) {
       setSettings({
@@ -101,6 +131,42 @@ export default function SettingsPage() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleFooterSave = async () => {
+    await fetch("/api/settings/footer", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: footerContent }),
+    });
+  };
+
+  const handleNavbarSave = async () => {
+    await fetch("/api/settings/navbar", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ links: JSON.parse(navbarLinks) }),
+    });
+  };
+
+  // Update the `handleBannerAdd` function to use the `Banner` type
+  const handleBannerAdd = async (newBanner: Banner) => {
+    await fetch("/api/settings/banners", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newBanner),
+    });
+    setBanners([...banners, newBanner]);
+  };
+
+  // Update the `handleBannerDelete` function to type the `id` parameter
+  const handleBannerDelete = async (id: string) => {
+    await fetch("/api/settings/banners", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    setBanners(banners.filter((banner) => banner.id !== id));
   };
 
   if (isLoading) {
@@ -148,6 +214,9 @@ export default function SettingsPage() {
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="social">Social Media</TabsTrigger>
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
+          <TabsTrigger value="footer">Footer</TabsTrigger>
+          <TabsTrigger value="navbar">Navbar</TabsTrigger>
+          <TabsTrigger value="banners">Banners</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general">
@@ -188,6 +257,26 @@ export default function SettingsPage() {
                   value={settings.footerText || ""}
                   onChange={handleChange}
                   placeholder="© 2025 My Blog. All rights reserved."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="contactEmail">Contact Email</Label>
+                <Input
+                  id="contactEmail"
+                  name="contactEmail"
+                  value={settings.contactEmail || ""}
+                  onChange={handleChange}
+                  placeholder="contact@example.com"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="contactPhone">Contact Phone</Label>
+                <Input
+                  id="contactPhone"
+                  name="contactPhone"
+                  value={settings.contactPhone || ""}
+                  onChange={handleChange}
+                  placeholder="+1 (234) 567-890"
                 />
               </div>
             </CardContent>
@@ -294,9 +383,89 @@ export default function SettingsPage() {
               </div>
               <div className="pt-4">
                 <p className="text-sm text-muted-foreground mb-4">
-                  Coming soon: Media upload functionality for images and customization of colors and typography.
+                  Coming soon: Media upload functionality for images and
+                  customization of colors and typography.
                 </p>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="footer">
+          <Card>
+            <CardHeader>
+              <CardTitle>Footer</CardTitle>
+              <CardDescription>
+                Manage the content of your site's footer.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="footer">Footer Content</Label>
+                <Textarea
+                  id="footer"
+                  value={footerContent}
+                  onChange={(e) => setFooterContent(e.target.value)}
+                />
+              </div>
+              <Button onClick={handleFooterSave}>Save Footer</Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="navbar">
+          <Card>
+            <CardHeader>
+              <CardTitle>Navbar</CardTitle>
+              <CardDescription>
+                Manage the links in your site's navbar.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="navbar">Navbar Links (JSON)</Label>
+                <Textarea
+                  id="navbar"
+                  value={navbarLinks}
+                  onChange={(e) => setNavbarLinks(e.target.value)}
+                />
+              </div>
+              <Button onClick={handleNavbarSave}>Save Navbar</Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="banners">
+          <Card>
+            <CardHeader>
+              <CardTitle>Banners</CardTitle>
+              <CardDescription>
+                Manage the banners displayed on your site.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <ul>
+                {banners.map((banner) => (
+                  <li key={banner.id} className="flex justify-between">
+                    <span>{banner.title}</span>
+                    <Button onClick={() => handleBannerDelete(banner.id)}>
+                      Delete
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+              <Button
+                onClick={() =>
+                  handleBannerAdd({
+                    id: "new",
+                    title: "New Banner",
+                    imageUrl: "",
+                    link: "",
+                  })
+                }
+              >
+                Add Banner
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>

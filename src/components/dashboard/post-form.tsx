@@ -120,56 +120,57 @@ export default function PostForm({ post, categories }: PostFormProps) {
       return;
     }
 
-    if (!categoryId) {
-      toast({
-        title: "Error",
-        description: "Please select a category",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       setIsSubmitting(true);
-
-      // Post data
       const formData = new FormData();
+
       formData.append("title", title);
-      formData.append("content", editor?.getHTML() || "");
+      formData.append("content", editor.getHTML());
       formData.append("excerpt", excerpt);
-      formData.append("slug", slug);
-      formData.append("categoryId", categoryId);
       formData.append("status", status);
 
-      if (photo) {
-        formData.append("photo", photo); // Append the photo file to the form data
-      }
+      if (isEditing && post?.id) {
+        formData.append("id", post.id);
+        if (photo) formData.append("featuredImage", photo);
+        if (slug) formData.append("slug", slug);
 
-      console.log("Form data:", formData);
+        // استخدم URLSearchParams لإضافة query parameter
+        const url = new URL("/api/posts", window.location.origin);
+        url.searchParams.append("id", post.id);
 
-      // Send form data to the API
-      const response = await fetch("/api/posts", {
-        method: "POST",
-        body: formData,
-      });
+        const response = await fetch(url.toString(), {
+          method: "PUT",
+          body: formData,
+        });
 
-      if (!response.ok) {
-        throw new Error("Failed to save post");
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to update post");
+        }
+      } else {
+        formData.append("slug", slug || generateSlug(title));
+        if (photo) formData.append("featuredImage", photo);
+        formData.append("categoryId", categoryId);
+
+        const response = await fetch("/api/posts", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) throw new Error("فشل إنشاء البوست");
       }
 
       toast({
-        title: isEditing ? "Post updated" : "Post created",
-        description: isEditing
-          ? "Your post has been updated successfully."
-          : "Your post has been created successfully.",
+        title: isEditing ? "تم تحديث البوست" : "تم إنشاء البوست",
+        description: `تم ${isEditing ? "تحديث" : "إنشاء"} البوست بنجاح`,
       });
 
       router.push("/dashboard/posts");
       router.refresh();
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
+        title: "خطأ",
+        description: "حدث خطأ. يرجى المحاولة مرة أخرى",
         variant: "destructive",
       });
     } finally {

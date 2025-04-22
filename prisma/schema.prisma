@@ -112,6 +112,31 @@ model Comment {
   replies   Comment[] @relation("CommentReplies")
 }
 
+model Footer {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  siteSetting SiteSetting?
+}
+
+model Navbar {
+  id        String   @id @default(cuid())
+  links     Json     // Store navigation links as JSON
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  siteSetting SiteSetting?
+}
+
+model Banner {
+  id        String   @id @default(cuid())
+  title     String
+  imageUrl  String
+  link      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model SiteSetting {
   id              String   @id @default(cuid())
   title           String   @default("My Blog")
@@ -126,6 +151,12 @@ model SiteSetting {
   footerText      String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  footerId        String?   @unique
+  navbarId        String?   @unique
+  footer          Footer?  @relation(fields: [footerId], references: [id])
+  navbar          Navbar?  @relation(fields: [navbarId], references: [id])
+  contactEmail    String?   // New field for contact email
+  contactPhone    String?   // New field for contact phone
 }
 
 model Media {

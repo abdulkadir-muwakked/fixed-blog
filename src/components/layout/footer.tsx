@@ -11,6 +11,8 @@ const arabicText = {
   categories: "التصنيفات",
 };
 
+// Updated footer to dynamically fetch footer text from the dashboard
+
 export default function Footer() {
   const currentYear = new Date().getFullYear();
   const [socialLinks, setSocialLinks] = useState({
@@ -20,13 +22,19 @@ export default function Footer() {
     linkedin: "",
     github: "",
   });
+  const [footerText, setFooterText] = useState("");
+  const [descriptionText, setDescriptionText] = useState("");
+  const [contactInfo, setContactInfo] = useState({
+    email: "",
+    phone: "",
+  });
 
   useEffect(() => {
-    async function fetchSocialLinks() {
+    async function fetchFooterData() {
       try {
         const response = await fetch("/api/settings");
         if (!response.ok) {
-          throw new Error("Failed to fetch social links");
+          throw new Error("Failed to fetch footer data");
         }
         const data = await response.json();
         setSocialLinks({
@@ -36,12 +44,57 @@ export default function Footer() {
           linkedin: data.settings.socialLinkedIn || "",
           github: data.settings.socialGithub || "",
         });
+        setFooterText(
+          data.settings.footerText ||
+            "© " + currentYear + " مدونة Next.js. جميع الحقوق محفوظة."
+        );
       } catch (error) {
-        console.error("Error fetching social links:", error);
+        console.error("Error fetching footer data:", error);
       }
     }
 
-    fetchSocialLinks();
+    fetchFooterData();
+  }, [currentYear]);
+
+  useEffect(() => {
+    async function fetchDescriptionText() {
+      try {
+        const response = await fetch("/api/settings");
+        if (!response.ok) {
+          throw new Error("Failed to fetch description text");
+        }
+        const data = await response.json();
+        setDescriptionText(
+          data.settings.description ||
+            "مدونة حديثة مبنية بتقنيات Next.js و React و Tailwind CSS، تتميز بتصميم أنيق ونظام قوي لإدارة المحتوى."
+        );
+      } catch (error) {
+        console.error("Error fetching description text:", error);
+      }
+    }
+
+    fetchDescriptionText();
+  }, []);
+
+  useEffect(() => {
+    async function fetchContactInfo() {
+      try {
+        const response = await fetch("/api/settings");
+        if (!response.ok) {
+          throw new Error("Failed to fetch contact information");
+        }
+        const data = await response.json();
+        console.log(data, "data");
+        setContactInfo({
+          email: data.settings.contactEmail || "contact@example.com",
+          phone: data.settings.contactPhone || "+1 (234) 567-890",
+        });
+      } catch (error) {
+        console.error("Error fetching contact information:", error);
+      }
+    }
+
+    fetchContactInfo();
   }, []);
 
   return (
@@ -50,8 +103,7 @@ export default function Footer() {
         <div className="flex flex-col space-y-4 mb-8 md:mb-0">
           <h3 className="text-lg font-semibold">مدونة Next.js</h3>
           <p className="text-sm text-muted-foreground max-w-xs">
-            مدونة حديثة مبنية بتقنيات Next.js و React و Tailwind CSS، تتميز
-            بتصميم أنيق ونظام قوي لإدارة المحتوى.
+            {descriptionText}
           </p>
           <div className="flex space-x-4">
             {socialLinks.github && (
@@ -160,16 +212,16 @@ export default function Footer() {
           <div className="flex flex-col space-y-2 col-span-2 md:col-span-1">
             <h4 className="font-medium text-sm">اتصل بنا</h4>
             <Link
-              href="mailto:contact@example.com"
+              href={`mailto:${contactInfo.email}`}
               className="text-sm text-muted-foreground hover:text-primary"
             >
-              contact@example.com
+              {contactInfo.email}
             </Link>
             <Link
-              href="tel:+1234567890"
+              href={`tel:${contactInfo.phone}`}
               className="text-sm text-muted-foreground hover:text-primary"
             >
-              +1 (234) 567-890
+              {contactInfo.phone}
             </Link>
           </div>
         </div>
@@ -177,7 +229,7 @@ export default function Footer() {
 
       <div className="container border-t py-6">
         <p className="text-sm text-center text-muted-foreground">
-          © {currentYear} مدونة Next.js. جميع الحقوق محفوظة.
+          {footerText}
         </p>
       </div>
     </footer>
