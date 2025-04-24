@@ -1,6 +1,6 @@
 # Ignore node_modules directory
 /node_modules
-
+.env
 # Ignore Prisma generated files
 /prisma/dev.db
 /prisma/migrations/
