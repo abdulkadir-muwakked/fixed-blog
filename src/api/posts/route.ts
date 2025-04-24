@@ -116,7 +116,17 @@ export async function POST(req: Request) {
         : files.featuredImage;
       if (file && "newFilename" in file) {
         featuredImage = `/uploads/${file.newFilename}`;
+      } else {
+        return NextResponse.json(
+          { error: "Invalid file upload or no file provided." },
+          { status: 400 }
+        );
       }
+    } else {
+      return NextResponse.json(
+        { error: "No file provided for the featured image." },
+        { status: 400 }
+      );
     }
 
     // Create post with categories

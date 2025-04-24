@@ -34,6 +34,20 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+// Ensure TabsTrigger and TabsContent components accept correct props
+// Update TabsTriggerProps and TabsContentProps interfaces
+interface TabsTriggerProps {
+  value: string;
+  children: React.ReactNode;
+  onClick?: () => void;
+}
+
+interface TabsContentProps {
+  value: string;
+  children: React.ReactNode;
+  className?: string;
+}
+
 type MediaItem = {
   id: string;
   filename: string;

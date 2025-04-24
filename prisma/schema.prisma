@@ -92,8 +92,8 @@ model CategoryPost {
   postId     String
   categoryId String
   assignedAt DateTime @default(now())
-  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   category   Category @relation(fields: [categoryId], references: [id])
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@id([postId, categoryId])
 }
@@ -106,25 +106,25 @@ model Comment {
   postId    String
   userId    String
   parentId  String?
-  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
   replies   Comment[] @relation("CommentReplies")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
 }
 
 model Footer {
-  id        String   @id @default(cuid())
-  content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String       @id @default(cuid())
+  content     String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
   siteSetting SiteSetting?
 }
 
 model Navbar {
-  id        String   @id @default(cuid())
-  links     Json     // Store navigation links as JSON
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String       @id @default(cuid())
+  links       Json
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
   siteSetting SiteSetting?
 }
 
@@ -151,12 +151,12 @@ model SiteSetting {
   footerText      String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  footerId        String?   @unique
-  navbarId        String?   @unique
-  footer          Footer?  @relation(fields: [footerId], references: [id])
+  footerId        String?  @unique
+  navbarId        String?  @unique
+  contactEmail    String?
+  contactPhone    String?
   navbar          Navbar?  @relation(fields: [navbarId], references: [id])
-  contactEmail    String?   // New field for contact email
-  contactPhone    String?   // New field for contact phone
+  footer          Footer?  @relation(fields: [footerId], references: [id])
 }
 
 model Media {

@@ -84,9 +84,9 @@ export async function POST(req: Request) {
       ? `/uploads/${(files.photo as formidable.File).newFilename}`
       : undefined;
 
-    if (!photo) {
-      throw new Error("File upload failed or no file provided.");
-    }
+    // if (!photo) {
+    //   throw new Error("File upload failed or no file provided.");
+    // }
 
     // Create the post first without categories
     const post = await prisma.post.create({

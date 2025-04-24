@@ -26,8 +26,18 @@ const settingsSchema = z.object({
   footerText: z.string().optional().nullable(),
 });
 
+// Define SegmentParams type
+interface SegmentParams {
+  [key: string]: string | string[] | undefined;
+}
+
+type RouteContext = { params: Promise<SegmentParams> };
+
 // Get settings
-export async function GET(req: NextRequest, res: NextResponse) {
+export async function GET(
+  req: NextRequest,
+  context: RouteContext
+): Promise<NextResponse> {
   try {
     // Check if the user is authenticated and an admin for write operations
     const session = await getServerSession(authOptions);
@@ -78,8 +88,11 @@ export async function GET(req: NextRequest, res: NextResponse) {
   }
 }
 
-// Update settings
-export async function POST(req: NextRequest, res: NextResponse) {
+// Update POST function to align with RouteContext
+export async function POST(
+  req: NextRequest,
+  context: RouteContext
+): Promise<NextResponse> {
   try {
     // Check if the user is authenticated and an admin
     const session = await getServerSession(authOptions);

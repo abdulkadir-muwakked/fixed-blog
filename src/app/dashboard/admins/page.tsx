@@ -65,16 +65,23 @@ export default function AdminsPage() {
   const fetchAdmins = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("/api/users/admins");
+      const response = await fetch("/api/users/admins", {
+        cache: "no-store",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch admin users");
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      setAdmins(data.admins);
+      console.log("API Response:", data); // تأكد من وجود جميع المشرفين هنا
+
+      setAdmins(data.admins || []); // استخدم مصفوفة فارغة كقيمة افتراضية
     } catch (error) {
-      console.error("Error fetching admins:", error);
+      console.error("Fetch error:", error);
       toast.error("Failed to load admin users");
     } finally {
       setIsLoading(false);
@@ -203,27 +210,37 @@ export default function AdminsPage() {
                   {admins.map((admin) => (
                     <TableRow key={admin.id}>
                       <TableCell>
-                        <div className="font-medium flex items-center">
-                          <Avatar className="h-8 w-8 mr-2">
-                            <AvatarImage
-                              src={admin.image || ""}
-                              alt={admin.name}
-                            />
+                        <div className="flex items-center">
+                          <Avatar className="h-8 w-8 mr-3">
+                            <AvatarImage src={admin.image || ""} />
                             <AvatarFallback>
-                              {getInitials(admin.name)}
+                              {admin.name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
                             </AvatarFallback>
                           </Avatar>
-                          {admin.name}
-                          {admin.id === session?.user.id && (
-                            <span className="ml-2 text-xs bg-primary/10 text-primary rounded-full px-2 py-0.5">
-                              You
-                            </span>
-                          )}
+                          <div>
+                            <div className="font-medium">
+                              {admin.name}
+                              {admin.id === session?.user.id && (
+                                <span className="ml-2 text-xs bg-primary/10 text-primary rounded-full px-2 py-0.5">
+                                  You
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {admin.email}
+                            </div>
+                          </div>
                         </div>
                       </TableCell>
-                      <TableCell>{admin.email}</TableCell>
                       <TableCell>
-                        {new Date(admin.createdAt).toLocaleDateString()}
+                        {new Date(admin.createdAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
                       </TableCell>
                     </TableRow>
                   ))}

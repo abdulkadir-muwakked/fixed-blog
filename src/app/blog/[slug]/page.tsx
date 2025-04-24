@@ -14,22 +14,22 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import prisma from "@/lib/db";
 
-export async function generateStaticParams() {
+export async function generateStaticParams(): Promise<
+  { params: { slug: string } }[]
+> {
   const posts = await prisma.post.findMany({
     select: { slug: true },
   });
 
-  return posts.map((post) => ({
-    slug: post.slug,
-  }));
+  return posts.map((post) => ({ params: { slug: post.slug } }));
 }
 
 export default async function BlogPostPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const { slug } = params;
+  const { slug } = await params;
 
   try {
     // Fetch the post from the database with necessary relations

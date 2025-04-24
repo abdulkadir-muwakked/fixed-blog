@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,11 +30,14 @@ import Typography from "@tiptap/extension-typography";
 import TextAlign from "@tiptap/extension-text-align";
 import { createLowlight } from "lowlight";
 import Toolbar from "../editor/toolbar";
+import { postSchema } from "@/lib/validations/post";
+import type { z } from "zod";
+
+type FormData = z.infer<typeof postSchema>;
 
 // Initialize lowlight with all languages
 const lowlight = createLowlight();
 
-// Types
 interface Category {
   id: string;
   name: string;
@@ -47,8 +52,10 @@ interface PostFormProps {
     slug: string;
     status: "PUBLISHED" | "DRAFT";
     categoryId?: string;
+    featuredImage?: string | null;
   };
   categories: Category[];
+  isEditMode: boolean; // Added isEditMode property
 }
 
 export default function PostForm({ post, categories }: PostFormProps) {
@@ -56,16 +63,26 @@ export default function PostForm({ post, categories }: PostFormProps) {
   const { toast } = useToast();
   const isEditing = !!post?.id;
 
-  // Form state
-  const [title, setTitle] = useState(post?.title || "");
-  const [slug, setSlug] = useState(post?.slug || "");
-  const [excerpt, setExcerpt] = useState(post?.excerpt || "");
-  const [categoryId, setCategoryId] = useState(post?.categoryId || "");
-  const [status, setStatus] = useState(post?.status || "PUBLISHED");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [photo, setPhoto] = useState<File | null>(null); // Added state for photo
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({
+    resolver: zodResolver(postSchema),
+    defaultValues: {
+      title: post?.title || "",
+      slug: post?.slug || "",
+      excerpt: post?.excerpt || "",
+      content: post?.content || "",
+      categoryId: post?.categoryId || "",
+      status: post?.status || "DRAFT",
+    },
+  });
 
-  // Editor
+  // Initialize editor with content
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -85,11 +102,20 @@ export default function PostForm({ post, categories }: PostFormProps) {
       Typography,
       TextAlign.configure({
         types: ["heading", "paragraph"],
-      }), // Added TextAlign extension
+      }),
     ],
-    content: post?.content || "",
-    immediatelyRender: false, // Added to avoid SSR hydration mismatches
+    content: watch("content"),
+    onUpdate: ({ editor }) => {
+      setValue("content", editor.getHTML(), { shouldValidate: true });
+    },
   });
+
+  // Set initial editor content
+  useEffect(() => {
+    if (editor && post?.content) {
+      editor.commands.setContent(post.content);
+    }
+  }, [editor, post?.content]);
 
   // Generate slug from title
   const generateSlug = (title: string) => {
@@ -101,105 +127,95 @@ export default function PostForm({ post, categories }: PostFormProps) {
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
-    setTitle(newTitle);
+    setValue("title", newTitle, { shouldValidate: true });
+
     if (!isEditing || !post?.slug) {
-      setSlug(generateSlug(newTitle));
+      setValue("slug", generateSlug(newTitle), { shouldValidate: true });
     }
   };
 
-  // Fixed the issue with category and status selection by ensuring their values are correctly captured and sent.
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!title || !editor?.getHTML()) {
-      toast({
-        title: "Error",
-        description: "Title and content are required",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const onSubmit = async (data: FormData) => {
     try {
-      setIsSubmitting(true);
       const formData = new FormData();
 
-      formData.append("title", title);
-      formData.append("content", editor.getHTML());
-      formData.append("excerpt", excerpt);
-      formData.append("status", status);
+      // Required fields
+      formData.append("title", data.title);
+      formData.append("content", data.content);
+      formData.append("slug", data.slug);
+      formData.append("status", data.status);
 
-      if (isEditing && post?.id) {
-        formData.append("id", post.id);
-        if (photo) formData.append("featuredImage", photo);
-        if (slug) formData.append("slug", slug);
+      // Optional fields
+      if (data.excerpt) formData.append("excerpt", data.excerpt);
+      if (data.categoryId) formData.append("categoryId", data.categoryId);
 
-        // استخدم URLSearchParams لإضافة query parameter
-        const url = new URL("/api/posts", window.location.origin);
-        url.searchParams.append("id", post.id);
+      // Handle file upload
+      if (data.photo?.[0]) {
+        formData.append("photo", data.photo[0]);
+      } else if (isEditing && !data.photo) {
+        // Keep existing image if not changed
+        formData.append("featuredImage", post?.featuredImage || "");
+      }
 
-        const response = await fetch(url.toString(), {
-          method: "PUT",
-          body: formData,
-        });
+      const method = isEditing ? "PUT" : "POST";
+      const url = isEditing ? `/api/posts/${post.id}` : "/api/posts";
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to update post");
-        }
-      } else {
-        formData.append("slug", slug || generateSlug(title));
-        if (photo) formData.append("featuredImage", photo);
-        formData.append("categoryId", categoryId);
+      const response = await fetch(url, {
+        method,
+        body: formData,
+      });
 
-        const response = await fetch("/api/posts", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!response.ok) throw new Error("فشل إنشاء البوست");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to save post");
       }
 
       toast({
-        title: isEditing ? "تم تحديث البوست" : "تم إنشاء البوست",
-        description: `تم ${isEditing ? "تحديث" : "إنشاء"} البوست بنجاح`,
+        title: isEditing ? "Post updated" : "Post created",
+        description: isEditing
+          ? "Your post has been updated successfully."
+          : "Your post has been created successfully.",
       });
 
       router.push("/dashboard/posts");
       router.refresh();
     } catch (error) {
+      console.error("Submission error:", error);
       toast({
-        title: "خطأ",
-        description: "حدث خطأ. يرجى المحاولة مرة أخرى",
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Something went wrong",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="grid gap-6 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="title">Title</Label>
+          <Label htmlFor="title">Title *</Label>
           <Input
             id="title"
-            value={title}
+            {...register("title")}
             onChange={handleTitleChange}
             placeholder="Enter post title"
-            required
+            className={errors.title ? "border-red-500" : ""}
           />
+          {errors.title && (
+            <p className="text-sm text-red-500">{errors.title.message}</p>
+          )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="slug">Slug</Label>
+          <Label htmlFor="slug">Slug *</Label>
           <Input
             id="slug"
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
+            {...register("slug")}
             placeholder="post-url-slug"
-            required
+            className={errors.slug ? "border-red-500" : ""}
           />
+          {errors.slug && (
+            <p className="text-sm text-red-500">{errors.slug.message}</p>
+          )}
         </div>
       </div>
 
@@ -207,18 +223,29 @@ export default function PostForm({ post, categories }: PostFormProps) {
         <Label htmlFor="excerpt">Excerpt</Label>
         <Textarea
           id="excerpt"
-          value={excerpt}
-          onChange={(e) => setExcerpt(e.target.value)}
+          {...register("excerpt")}
           placeholder="Brief summary of your post"
           rows={3}
+          className={errors.excerpt ? "border-red-500" : ""}
         />
+        {errors.excerpt && (
+          <p className="text-sm text-red-500">{errors.excerpt.message}</p>
+        )}
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="category">Category</Label>
-          <Select value={categoryId} onValueChange={setCategoryId}>
-            <SelectTrigger id="category">
+          <Label htmlFor="category">Category *</Label>
+          <Select
+            value={watch("categoryId")}
+            onValueChange={(value) =>
+              setValue("categoryId", value, { shouldValidate: true })
+            }
+          >
+            <SelectTrigger
+              id="category"
+              className={errors.categoryId ? "border-red-500" : ""}
+            >
               <SelectValue placeholder="Select a category" />
             </SelectTrigger>
             <SelectContent>
@@ -229,12 +256,17 @@ export default function PostForm({ post, categories }: PostFormProps) {
               ))}
             </SelectContent>
           </Select>
+          {errors.categoryId && (
+            <p className="text-sm text-red-500">{errors.categoryId.message}</p>
+          )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="status">Status</Label>
+          <Label htmlFor="status">Status *</Label>
           <Select
-            value={status}
-            onValueChange={(value: "PUBLISHED" | "DRAFT") => setStatus(value)}
+            value={watch("status")}
+            onValueChange={(value: "PUBLISHED" | "DRAFT") =>
+              setValue("status", value, { shouldValidate: true })
+            }
           >
             <SelectTrigger id="status">
               <SelectValue placeholder="Select status" />
@@ -248,7 +280,7 @@ export default function PostForm({ post, categories }: PostFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="content">Content</Label>
+        <Label htmlFor="content">Content *</Label>
         <Card className="border rounded-md">
           <CardContent className="p-3">
             {editor && <Toolbar editor={editor} />}
@@ -257,16 +289,35 @@ export default function PostForm({ post, categories }: PostFormProps) {
             </div>
           </CardContent>
         </Card>
+        {errors.content && (
+          <p className="text-sm text-red-500">{errors.content.message}</p>
+        )}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="photo">Photo</Label>
-        <Input
-          id="photo"
-          type="file"
-          accept="image/*"
-          onChange={(e) => setPhoto(e.target.files?.[0] || null)}
-        />
+        <Label htmlFor="photo">Featured Image</Label>
+        <Input id="photo" type="file" accept="image/*" {...register("photo")} />
+        {post?.featuredImage && (
+          <div className="mt-2">
+            <p className="text-sm text-muted-foreground">Current Image:</p>
+            <img
+              src={post.featuredImage}
+              alt="Current featured"
+              className="h-20 object-cover rounded"
+            />
+            {isEditing && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="mt-2 text-red-500"
+                onClick={() => setValue("photo", undefined)}
+              >
+                Remove Image
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="flex justify-end gap-3">

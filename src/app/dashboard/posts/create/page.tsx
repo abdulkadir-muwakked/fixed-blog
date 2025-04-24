@@ -31,7 +31,7 @@ export default async function CreatePostPage() {
           </Button>
         </DashboardHeader>
 
-        <PostForm categories={categories} />
+        <PostForm categories={categories} isEditMode={false} />
       </div>
     </DashboardShell>
   );

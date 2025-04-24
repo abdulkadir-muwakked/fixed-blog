@@ -14,53 +14,92 @@ interface EditPostPageProps {
   };
 }
 
-export default async function EditPostPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+interface PostFormProps {
+  post: {
+    categories: { id: string; name: string }[];
+    excerpt: string;
+    status: "DRAFT" | "PUBLISHED";
+    author: { id: string; name: string | null; email: string };
+    id: string;
+    slug: string;
+    createdAt: Date;
+    updatedAt: Date;
+    title?: string; // Add specific optional fields if needed
+  };
+  categories: { id: string; name: string }[];
+  isEditMode: boolean;
+}
+
+export default async function EditPostPage({ params }: EditPostPageProps) {
   const session = await getServerSession(authOptions);
 
   if (!session) {
     redirect("/login?callbackUrl=/dashboard/posts");
   }
 
-  const { id: postId } = await params; // Await `params` to resolve the error
+  try {
+    const post = await prisma.post.findUnique({
+      where: { id: params.id },
+      include: {
+        categories: {
+          select: {
+            category: true,
+          },
+        },
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
 
-  const post = await prisma.post.findUnique({
-    where: { id: postId },
-    include: { categories: true },
-  });
+    if (!post) {
+      return <div>Post not found</div>;
+    }
 
-  if (!post) {
-    return <div>Post not found</div>;
-  }
+    // تحويل categories إلى التنسيق المتوقع
+    const postCategories = post.categories.map((cat) => ({
+      id: cat.category.id,
+      name: cat.category.name,
+    }));
 
-  const normalizedPost = {
-    ...post,
-    excerpt: post.excerpt ?? "",
-    status: post.status as "PUBLISHED" | "DRAFT",
-  };
+    const normalizedPost = {
+      ...post,
+      categories: postCategories,
+      excerpt: post.excerpt ?? "",
+      status: post.status as "PUBLISHED" | "DRAFT",
+    };
 
-  const categories = await prisma.category.findMany({
-    orderBy: { name: "asc" },
-  });
+    const allCategories = await prisma.category.findMany({
+      orderBy: { name: "asc" },
+    });
 
-  return (
-    <DashboardShell>
-      <DashboardNav />
-      <div className="flex-1 space-y-4 p-8 pt-6">
-        <DashboardHeader
-          heading="Edit Post"
-          text="Make changes to your post and update it"
-        />
+    return (
+      <DashboardShell>
+        <DashboardNav />
+        <div className="flex-1 space-y-4 p-8 pt-6">
+          <DashboardHeader
+            heading="Edit Post"
+            text="Make changes to your post and update it"
+          />
 
-        <div className="grid gap-4">
-          <PostForm post={normalizedPost} categories={categories} />
+          <div className="grid gap-4">
+            <PostForm
+              post={normalizedPost}
+              categories={allCategories}
+              isEditMode={true}
+            />
+          </div>
+
+          <Toaster />
         </div>
-
-        <Toaster />
-      </div>
-    </DashboardShell>
-  );
+      </DashboardShell>
+    );
+  } catch (error) {
+    console.error("Error fetching post data:", error);
+    return <div>Error loading post data</div>;
+  }
 }
