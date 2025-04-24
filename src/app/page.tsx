@@ -17,16 +17,15 @@ export default async function Page() {
       <section className="relative bg-slate-950 py-20 md:py-32 overflow-hidden">
         <div className="container relative z-10 flex flex-col items-center text-center">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white max-w-4xl">
-            Insights and Ideas for the Modern Developer
+            موقع متخصص بالمقلات الطبية
           </h1>
           <p className="mt-6 text-lg text-slate-300 max-w-2xl">
-            Stay up-to-date with the latest in web development, design, and
-            tech, with our expertly curated content and in-depth tutorials.
+            مقلات طبية عن عمليات الطبية والتجملية في تركيا
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4">
             <Button asChild size="lg">
               <Link href="/blog">
-                Explore Articles
+                اقراء المقالات
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
@@ -35,7 +34,7 @@ export default async function Page() {
               size="lg"
               className="bg-transparent text-white border-white hover:bg-white hover:text-slate-950"
             >
-              <Link href="/categories">Browse Categories</Link>
+              <Link href="https://o9medical.com/">تصفح الفئات</Link>
             </Button>
           </div>
         </div>
@@ -114,7 +113,7 @@ export default async function Page() {
       </section>
 
       {/* Newsletter Section */}
-      <section className="bg-muted py-16">
+      {/* <section className="bg-muted py-16">
         <div className="container flex flex-col items-center text-center">
           <h2 className="text-3xl font-bold mb-4">
             Subscribe to Our Newsletter
@@ -133,7 +132,7 @@ export default async function Page() {
             <Button type="submit">Subscribe</Button>
           </form>
         </div>
-      </section>
+      </section> */}
     </>
   );
 }
