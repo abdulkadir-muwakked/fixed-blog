@@ -1,14 +1,14 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/nextjs"
-    }
-  ],
   "build": {
     "env": {
       "PRISMA_GENERATE": "true"
     }
-  }
+  },
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ]
 }
