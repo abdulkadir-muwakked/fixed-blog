@@ -10,13 +10,15 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/config";
 import type { Viewport } from "next";
 import ClientProviders from "./providers";
+import Head from "next/head";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "مدونة Next.js",
-  description: "مدونة مبنية بتقنيات Next.js و React و Tailwind CSS",
-  keywords: ["Next.js", "React", "مدونة", "Tailwind CSS"],
+  title: "موقع طبي",
+  description:
+    "موقع متخصص بالمقلات الطبية\nمقلات طبية عن عمليات الطبية والتجملية في تركيا",
+  keywords: ["مقالات طبية", "العلاج في تركيا", "مدونة", "تجميل"],
 };
 
 export const viewport: Viewport = {
@@ -35,6 +37,12 @@ export default async function RootLayout({
 
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning>
+      <Head>
+        <meta
+          name="google-site-verification"
+          content="IrhvVIjS-qyMMdgxEVHsPiFAsrMNq7NWvz5Asj0ELn8"
+        />
+      </Head>
       <body
         className={cn(
           "min-h-screen bg-background antialiased",
