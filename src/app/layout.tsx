@@ -17,7 +17,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "موقع طبي",
   description:
-    "موقع متخصص بالمقلات الطبية\nمقلات طبية عن عمليات الطبية والتجملية في تركيا",
+    ".موقع متخصص بالمقلات الطبية\nمقلات طبية عن عمليات الطبية والتجملية في تركيا",
   keywords: ["مقالات طبية", "العلاج في تركيا", "مدونة", "تجميل"],
 };
 
@@ -27,7 +27,6 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: dark)", color: "black" },
   ],
 };
-
 export default async function RootLayout({
   children,
 }: {
