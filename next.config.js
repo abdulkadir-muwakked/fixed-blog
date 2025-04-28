@@ -22,9 +22,9 @@ const nextConfig = {
       },
     ];
   },
-  experimental: {
-    optimizePackageImports: ["@prisma/client"],
-  },
+  // experimental: {
+  //   optimizePackageImports: ["@prisma/client"],
+  // },
 };
 
 module.exports = nextConfig;
