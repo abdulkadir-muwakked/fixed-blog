@@ -15,14 +15,14 @@ import prisma from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-export async function generateStaticParams(): Promise<
-  { params: { slug: string } }[]
-> {
+export async function generateStaticParams() {
   const posts = await prisma.post.findMany({
     select: { slug: true },
   });
 
-  return posts.map((post) => ({ params: { slug: post.slug } }));
+  return posts.map((post) => ({
+    slug: post.slug,
+  }));
 }
 
 type BlogPostProps = {
@@ -43,11 +43,13 @@ type BlogPostProps = {
   views?: number | null;
 };
 
-export default async function BlogPostPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
+interface PageProps {
+  params: {
+    slug: string;
+  };
+}
+
+export default async function BlogPostPage({ params }: PageProps) {
   try {
     const post = await prisma.post.findUnique({
       where: { slug: params.slug },
@@ -65,7 +67,7 @@ export default async function BlogPostPage({
     notFound();
   }
 }
-/// BlogPost component
+
 function BlogPost({ post }: { post: BlogPostProps }) {
   const publishedAt = post?.publishedAt || new Date();
   const authorImage = post?.author?.image || null;
