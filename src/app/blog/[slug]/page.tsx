@@ -65,7 +65,7 @@ export default async function BlogPostPage({
     notFound();
   }
 }
-
+/// BlogPost component
 function BlogPost({ post }: { post: BlogPostProps }) {
   const publishedAt = post?.publishedAt || new Date();
   const authorImage = post?.author?.image || null;
