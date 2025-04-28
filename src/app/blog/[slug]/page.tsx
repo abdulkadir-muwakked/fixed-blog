@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   CalendarDays,
-  Clock,
   Share2,
   ChevronLeft,
   Facebook,
@@ -41,15 +40,6 @@ type BlogPostProps = {
       name: string;
     };
   }> | null;
-  comments?: Array<{
-    id: string;
-    content: string;
-    createdAt: Date;
-    user?: {
-      name?: string | null;
-      image?: string | null;
-    } | null;
-  }> | null;
   views?: number | null;
 };
 
@@ -64,7 +54,6 @@ export default async function BlogPostPage({
       include: {
         author: true,
         categories: { include: { category: true } },
-        comments: { include: { user: true } },
       },
     });
 
@@ -78,7 +67,6 @@ export default async function BlogPostPage({
 }
 
 function BlogPost({ post }: { post: BlogPostProps }) {
-  // Safely handle nullable properties
   const publishedAt = post?.publishedAt || new Date();
   const authorImage = post?.author?.image || null;
   const authorName = post?.author?.name || "Unknown Author";
@@ -87,7 +75,6 @@ function BlogPost({ post }: { post: BlogPostProps }) {
 
   return (
     <article className="pb-16">
-      {/* Hero Image */}
       <div className="relative h-[40vh] overflow-hidden">
         <Image
           src={
@@ -104,7 +91,6 @@ function BlogPost({ post }: { post: BlogPostProps }) {
       </div>
 
       <div className="container max-w-4xl -mt-16 relative">
-        {/* Categories and back link */}
         <div className="flex justify-between items-center mb-4">
           <Button asChild variant="ghost" size="sm">
             <Link href="/blog" className="flex items-center">
@@ -129,14 +115,12 @@ function BlogPost({ post }: { post: BlogPostProps }) {
           )}
         </div>
 
-        {/* Post card */}
         <Card className="p-8 shadow-lg">
           <CardContent className="p-0">
             <h1 className="text-3xl md:text-4xl font-bold mb-4">
               {post.title}
             </h1>
 
-            {/* Author and metadata */}
             <div className="flex items-center justify-between flex-wrap mb-8 pb-6 border-b">
               {post.author && (
                 <div className="flex items-center gap-4">
@@ -174,7 +158,6 @@ function BlogPost({ post }: { post: BlogPostProps }) {
               </div>
             </div>
 
-            {/* Post content */}
             <div
               className="prose prose-zinc dark:prose-invert max-w-none mb-8"
               dangerouslySetInnerHTML={{
@@ -182,7 +165,6 @@ function BlogPost({ post }: { post: BlogPostProps }) {
               }}
             />
 
-            {/* Share buttons */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-t pt-6 mt-8">
               <div className="text-sm font-medium mb-4 sm:mb-0">
                 Share this article
@@ -216,105 +198,6 @@ function BlogPost({ post }: { post: BlogPostProps }) {
             </div>
           </CardContent>
         </Card>
-
-        {/* Comments section */}
-        {post.comments && post.comments.length > 0 && (
-          <div className="mt-12">
-            <div className="flex items-center gap-2 mb-6">
-              <h2 className="text-2xl font-bold">Comments</h2>
-              <span className="text-muted-foreground">
-                ({post.comments.length})
-              </span>
-            </div>
-
-            <div className="space-y-6">
-              {post.comments.map((comment) => (
-                <div key={comment.id} className="flex gap-4 border-b pb-6">
-                  {comment.user?.image && (
-                    <div className="relative h-10 w-10 rounded-full overflow-hidden flex-shrink-0">
-                      <Image
-                        src={
-                          comment.user.image.startsWith("/")
-                            ? comment.user.image
-                            : `/uploads/${comment.user.image}`
-                        }
-                        alt={comment.user?.name || "Comment user"}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start">
-                      <div className="font-medium">
-                        {comment.user?.name || "Anonymous"}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {comment.createdAt.toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </div>
-                    </div>
-                    <p className="mt-2 text-sm">{comment.content}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Comment form */}
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold mb-4">Leave a comment</h3>
-              <form className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label
-                      htmlFor="name"
-                      className="block text-sm font-medium mb-1"
-                    >
-                      Name
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="email"
-                      className="block text-sm font-medium mb-1"
-                    >
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
-                      required
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label
-                    htmlFor="comment"
-                    className="block text-sm font-medium mb-1"
-                  >
-                    Comment
-                  </label>
-                  <textarea
-                    id="comment"
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[120px]"
-                    required
-                  />
-                </div>
-                <Button type="submit">Submit Comment</Button>
-              </form>
-            </div>
-          </div>
-        )}
       </div>
     </article>
   );
