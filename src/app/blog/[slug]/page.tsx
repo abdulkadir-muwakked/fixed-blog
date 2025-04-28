@@ -1,16 +1,4 @@
-import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import {
-  CalendarDays,
-  Share2,
-  ChevronLeft,
-  Facebook,
-  Twitter,
-  Linkedin,
-} from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import prisma from "@/lib/db";
 import { useEffect, useState } from "react";
 import BlogPost from "./BlogPost";

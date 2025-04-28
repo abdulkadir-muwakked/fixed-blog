@@ -65,17 +65,15 @@ export default function BlogPost({ post }: { post: BlogPostProps }) {
           </Button>
           {post.categories && post.categories.length > 0 && (
             <div className="flex gap-2">
-              {post.categories.map(
-                ({ category }: { category: { id: string; name: string } }) => (
-                  <Link
-                    key={category.id}
-                    href={`/blog?category=${category.name.toLowerCase()}`}
-                    className="text-xs py-1 px-2 bg-muted rounded-full hover:bg-muted/80"
-                  >
-                    {category.name}
-                  </Link>
-                )
-              )}
+              {post.categories.map(({ category }) => (
+                <Link
+                  key={category.id}
+                  href={`/blog?category=${category.name.toLowerCase()}`}
+                  className="text-xs py-1 px-2 bg-muted rounded-full hover:bg-muted/80"
+                >
+                  {category.name}
+                </Link>
+              ))}
             </div>
           )}
         </div>
@@ -125,9 +123,7 @@ export default function BlogPost({ post }: { post: BlogPostProps }) {
 
             <div
               className="prose prose-zinc dark:prose-invert max-w-none mb-8"
-              dangerouslySetInnerHTML={{
-                __html: content,
-              }}
+              dangerouslySetInnerHTML={{ __html: content }}
             />
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-t pt-6 mt-8">
