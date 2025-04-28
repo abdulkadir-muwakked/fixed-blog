@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import prisma from "@/lib/db";
+import { useEffect, useState } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -49,30 +50,42 @@ interface PageProps {
   };
 }
 
-export default async function BlogPostPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
-  const { slug } = params; // Ensure params is not treated as a Promise
+export default function BlogPostPage({ params }: { params: { slug: string } }) {
+  const { slug } = params; // Extract slug from params
 
-  try {
-    const post = await prisma.post.findUnique({
-      where: { slug },
-      include: {
-        author: true,
-        categories: { include: { category: true } },
-        comments: { include: { user: true } },
-      },
-    });
+  const [post, setPost] = useState<BlogPostProps | null>(null);
 
-    if (!post) notFound();
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const post = await prisma.post.findUnique({
+          where: { slug },
+          include: {
+            author: true,
+            categories: { include: { category: true } },
+            comments: { include: { user: true } },
+          },
+        });
 
-    return <BlogPost post={post} />;
-  } catch (error) {
-    console.error("Blog post fetch failed:", error);
-    notFound();
+        if (!post) {
+          notFound();
+        } else {
+          setPost(post);
+        }
+      } catch (error) {
+        console.error("Blog post fetch failed:", error);
+        notFound();
+      }
+    };
+
+    fetchPost();
+  }, [slug]);
+
+  if (!post) {
+    return <div>Loading...</div>; // Optionally, return a loading state while fetching data
   }
+
+  return <BlogPost post={post} />;
 }
 
 function BlogPost({ post }: { post: BlogPostProps }) {
