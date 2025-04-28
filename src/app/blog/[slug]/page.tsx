@@ -49,13 +49,20 @@ interface PageProps {
   };
 }
 
-export default async function BlogPostPage({ params }: PageProps) {
+export default async function BlogPostPage({
+  params,
+}: {
+  params: { slug: string };
+}) {
+  const { slug } = params; // Ensure params is not treated as a Promise
+
   try {
     const post = await prisma.post.findUnique({
-      where: { slug: params.slug },
+      where: { slug },
       include: {
         author: true,
         categories: { include: { category: true } },
+        comments: { include: { user: true } },
       },
     });
 
