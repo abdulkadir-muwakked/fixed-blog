@@ -60,8 +60,22 @@ export async function DELETEBanner(req: Request) {
 // Updated API to handle contactEmail and contactPhone fields
 
 export async function GET(req: Request) {
-  const settings = await prisma.siteSetting.findFirst();
-  return NextResponse.json({ settings });
+  try {
+    const settings = await prisma.siteSetting.findFirst();
+    if (!settings) {
+      return NextResponse.json(
+        { error: "Site settings not found" },
+        { status: 404 }
+      );
+    }
+    return NextResponse.json({ settings });
+  } catch (error) {
+    console.error("Error fetching site settings:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch site settings" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(req: Request) {

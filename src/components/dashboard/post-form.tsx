@@ -28,6 +28,7 @@ import TextStyle from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 import Typography from "@tiptap/extension-typography";
 import TextAlign from "@tiptap/extension-text-align";
+import Heading from "@tiptap/extension-heading";
 import { createLowlight } from "lowlight";
 import Toolbar from "../editor/toolbar";
 import { postSchema } from "@/lib/validations/post";
@@ -102,6 +103,9 @@ export default function PostForm({ post, categories }: PostFormProps) {
       Typography,
       TextAlign.configure({
         types: ["heading", "paragraph"],
+      }),
+      Heading.configure({
+        levels: [1, 2, 3],
       }),
     ],
     content: watch("content"),

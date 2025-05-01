@@ -4,7 +4,7 @@ import { type Editor } from "@tiptap/react";
 import {
   Bold,
   Italic,
-  Underline,
+  Underline as UnderlineIcon, // Renamed icon import
   Strikethrough,
   Code,
   Heading1,
@@ -24,11 +24,12 @@ import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
-  PopoverTrigger
+  PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import Heading from "@tiptap/extension-heading";
 
 interface ToolbarProps {
   editor: Editor;
@@ -44,13 +45,12 @@ export default function Toolbar({ editor }: ToolbarProps) {
   const setLink = () => {
     if (!linkUrl) return;
 
-    // Empty
     if (linkUrl === "") {
       editor.chain().focus().extendMarkRange("link").unsetLink().run();
       return;
     }
+    console.log(linkUrl);
 
-    // Update link
     editor
       .chain()
       .focus()
@@ -102,7 +102,7 @@ export default function Toolbar({ editor }: ToolbarProps) {
           pressed={editor.isActive("underline")}
           onPressedChange={() => editor.chain().focus().toggleUnderline().run()}
         >
-          <Underline className="h-4 w-4" />
+          <UnderlineIcon className="h-4 w-4" />
         </Toggle>
         <Toggle
           size="sm"
@@ -124,21 +124,27 @@ export default function Toolbar({ editor }: ToolbarProps) {
         <Toggle
           size="sm"
           pressed={editor.isActive("heading", { level: 1 })}
-          onPressedChange={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          onPressedChange={() =>
+            editor.chain().focus().toggleHeading({ level: 1 }).run()
+          }
         >
           <Heading1 className="h-4 w-4" />
         </Toggle>
         <Toggle
           size="sm"
           pressed={editor.isActive("heading", { level: 2 })}
-          onPressedChange={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          onPressedChange={() =>
+            editor.chain().focus().toggleHeading({ level: 2 }).run()
+          }
         >
           <Heading2 className="h-4 w-4" />
         </Toggle>
         <Toggle
           size="sm"
           pressed={editor.isActive("heading", { level: 3 })}
-          onPressedChange={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          onPressedChange={() =>
+            editor.chain().focus().toggleHeading({ level: 3 }).run()
+          }
         >
           <Heading3 className="h-4 w-4" />
         </Toggle>
@@ -148,14 +154,18 @@ export default function Toolbar({ editor }: ToolbarProps) {
         <Toggle
           size="sm"
           pressed={editor.isActive("bulletList")}
-          onPressedChange={() => editor.chain().focus().toggleBulletList().run()}
+          onPressedChange={() =>
+            editor.chain().focus().toggleBulletList().run()
+          }
         >
           <List className="h-4 w-4" />
         </Toggle>
         <Toggle
           size="sm"
           pressed={editor.isActive("orderedList")}
-          onPressedChange={() => editor.chain().focus().toggleOrderedList().run()}
+          onPressedChange={() =>
+            editor.chain().focus().toggleOrderedList().run()
+          }
         >
           <ListOrdered className="h-4 w-4" />
         </Toggle>
@@ -165,28 +175,36 @@ export default function Toolbar({ editor }: ToolbarProps) {
         <Toggle
           size="sm"
           pressed={editor.isActive({ textAlign: "left" })}
-          onPressedChange={() => editor.chain().focus().setTextAlign("left").run()}
+          onPressedChange={() =>
+            editor.chain().focus().setTextAlign("left").run()
+          }
         >
           <AlignLeft className="h-4 w-4" />
         </Toggle>
         <Toggle
           size="sm"
           pressed={editor.isActive({ textAlign: "center" })}
-          onPressedChange={() => editor.chain().focus().setTextAlign("center").run()}
+          onPressedChange={() =>
+            editor.chain().focus().setTextAlign("center").run()
+          }
         >
           <AlignCenter className="h-4 w-4" />
         </Toggle>
         <Toggle
           size="sm"
           pressed={editor.isActive({ textAlign: "right" })}
-          onPressedChange={() => editor.chain().focus().setTextAlign("right").run()}
+          onPressedChange={() =>
+            editor.chain().focus().setTextAlign("right").run()
+          }
         >
           <AlignRight className="h-4 w-4" />
         </Toggle>
         <Toggle
           size="sm"
           pressed={editor.isActive({ textAlign: "justify" })}
-          onPressedChange={() => editor.chain().focus().setTextAlign("justify").run()}
+          onPressedChange={() =>
+            editor.chain().focus().setTextAlign("justify").run()
+          }
         >
           <AlignJustify className="h-4 w-4" />
         </Toggle>
@@ -195,10 +213,7 @@ export default function Toolbar({ editor }: ToolbarProps) {
 
         <Popover open={isLinkPopoverOpen} onOpenChange={setIsLinkPopoverOpen}>
           <PopoverTrigger asChild>
-            <Toggle
-              size="sm"
-              pressed={editor.isActive("link")}
-            >
+            <Toggle size="sm" pressed={editor.isActive("link")}>
               <LinkIcon className="h-4 w-4" />
             </Toggle>
           </PopoverTrigger>

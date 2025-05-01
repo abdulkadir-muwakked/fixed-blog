@@ -72,28 +72,10 @@ function BlogPost({
   const publishedAt = post?.publishedAt || new Date();
 
   return (
-    <article className="pb-16">
-      {/* Hero Image */}
-      <div className="relative h-[40vh] overflow-hidden">
-        <Image
-          src={
-            post.featuredImage
-              ? post.featuredImage.startsWith("/")
-                ? post.featuredImage
-                : `/uploads/${post.featuredImage}`
-              : "/uploads/default-image.jpg"
-          }
-          alt={post.title || "Default Title"}
-          fill
-          className="object-cover"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
-      </div>
-
+    <article className="pb-16 pt-16">
       <div className="container max-w-4xl -mt-16 relative">
         {/* Categories and back link */}
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-4 relative z-10">
           <Button asChild variant="ghost" size="sm">
             <Link href="/blog" className="flex items-center">
               <ChevronLeft className="h-4 w-4 mr-1" />
@@ -163,7 +145,23 @@ function BlogPost({
                 </div>
               </div>
             </div>
-
+            {/* Hero Image */}
+            <div className="relative h-[40vh] overflow-hidden">
+              <Image
+                src={
+                  post.featuredImage
+                    ? post.featuredImage.startsWith("/")
+                      ? post.featuredImage
+                      : `/uploads/${post.featuredImage}`
+                    : "/uploads/default-image.jpg"
+                }
+                alt={post.title || "Default Title"}
+                fill
+                className="object-cover"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+            </div>
             {/* Post content */}
             <div
               className="prose prose-zinc dark:prose-invert max-w-none mb-8"
