@@ -14,92 +14,51 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import prisma from "@/lib/db";
 import { Metadata } from "next";
+
 export const dynamic = "force-dynamic";
+
 export async function generateStaticParams() {
   const posts = await prisma.post.findMany({
     select: { slug: true },
   });
-
   return posts.map((post) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  try {
-    const post = await prisma.post.findUnique({
-      where: { slug: params.slug },
-      select: {
-        metaDescription: true,
-        metaKeywords: true,
-        title: true,
-        featuredImage: true,
-        publishedAt: true,
-      },
-    });
+  const { slug } = await params;
+  const post = await prisma.post.findUnique({
+    where: { slug },
+    select: {
+      metaDescription: true,
+      metaKeywords: true,
+      title: true,
+    },
+  });
 
-    if (!post) {
-      return {
-        title: "Post Not Found",
-        description: "The requested post could not be found.",
-        robots: {
-          index: false,
-          follow: false,
-        },
-      };
-    }
-
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-    const featuredImageUrl = post.featuredImage
-      ? new URL(post.featuredImage, baseUrl).toString()
-      : null;
-
-    const metadata: Metadata = {
-      title: post.title,
-      description: post.metaDescription || "",
-      keywords: post.metaKeywords
-        ? post.metaKeywords.split(",").map((keyword) => keyword.trim())
-        : [],
-      openGraph: {
-        title: post.title,
-        description: post.metaDescription || "",
-        type: "article",
-        publishedTime: post.publishedAt?.toISOString(),
-        images: featuredImageUrl ? [{ url: featuredImageUrl }] : [],
-      },
-      twitter: {
-        card: "summary_large_image",
-        title: post.title,
-        description: post.metaDescription || "",
-        images: featuredImageUrl ? [featuredImageUrl] : [],
-      },
-      alternates: {
-        canonical: new URL(`/blog/${params.slug}`, baseUrl).toString(),
-      },
-    };
-
-    return metadata;
-  } catch (error) {
-    console.error("Error generating metadata:", error);
+  if (!post) {
     return {
-      title: "Error",
-      description: "An error occurred while generating metadata.",
-      robots: {
-        index: false,
-        follow: false,
-      },
+      title: "Post Not Found",
+      description: "The requested post could not be found.",
     };
   }
+
+  return {
+    title: post.title,
+    description: post.metaDescription || "",
+    keywords: post.metaKeywords ? post.metaKeywords.split(",") : [],
+  };
 }
 
 export default async function BlogPostPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const { slug } = params;
+  const { slug } = await params;
 
   try {
     const post = await prisma.post.findUnique({
@@ -172,14 +131,12 @@ function BlogPost({
             </div>
           )}
         </div>
-
         {/* Post card */}
         <Card className="p-8 shadow-lg">
           <CardContent className="p-0">
             <h1 className="text-3xl md:text-4xl font-bold mb-4">
               {post.title}
             </h1>
-
             {/* Author and metadata */}
             <div className="flex items-center justify-between flex-wrap mb-8 pb-6 border-b">
               {post.author && (
@@ -205,7 +162,6 @@ function BlogPost({
                   </div>
                 </div>
               )}
-
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-4 sm:mt-0">
                 <div className="flex items-center text-sm text-muted-foreground">
                   <CalendarDays className="h-4 w-4 mr-1" />
@@ -243,7 +199,6 @@ function BlogPost({
                 __html: post.content || "<p>No content available.</p>",
               }}
             />
-
             {/* Share buttons */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-t pt-6 mt-8">
               <div className="text-sm font-medium mb-4 sm:mb-0">
@@ -278,7 +233,6 @@ function BlogPost({
             </div>
           </CardContent>
         </Card>
-
         {/* Comments section */}
         {post.comments && post.comments.length > 0 && (
           <div className="mt-12">
@@ -288,7 +242,6 @@ function BlogPost({
                 ({post.comments.length})
               </span>
             </div>
-
             <div className="space-y-6">
               {post?.comments?.map(
                 (comment: {
@@ -331,7 +284,6 @@ function BlogPost({
                 )
               )}
             </div>
-
             {/* Comment form */}
             <div className="mt-8">
               <h3 className="text-lg font-semibold mb-4">Leave a comment</h3>
