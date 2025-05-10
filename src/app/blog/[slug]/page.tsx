@@ -28,60 +28,70 @@ export async function generateMetadata({
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const post = await prisma.post.findUnique({
-    where: { slug: params.slug },
-    select: {
-      metaDescription: true,
-      metaKeywords: true,
-      title: true,
-      featuredImage: true,
-      publishedAt: true,
-    },
-  });
+  try {
+    const post = await prisma.post.findUnique({
+      where: { slug: params.slug },
+      select: {
+        metaDescription: true,
+        metaKeywords: true,
+        title: true,
+        featuredImage: true,
+        publishedAt: true,
+      },
+    });
 
-  if (!post) {
+    if (!post) {
+      return {
+        title: "Post Not Found",
+        description: "The requested post could not be found.",
+        robots: {
+          index: false,
+          follow: false,
+        },
+      };
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    const featuredImageUrl = post.featuredImage
+      ? new URL(post.featuredImage, baseUrl).toString()
+      : null;
+
+    const metadata: Metadata = {
+      title: post.title,
+      description: post.metaDescription || "",
+      keywords: post.metaKeywords
+        ? post.metaKeywords.split(",").map((keyword) => keyword.trim())
+        : [],
+      openGraph: {
+        title: post.title,
+        description: post.metaDescription || "",
+        type: "article",
+        publishedTime: post.publishedAt?.toISOString(),
+        images: featuredImageUrl ? [{ url: featuredImageUrl }] : [],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: post.title,
+        description: post.metaDescription || "",
+        images: featuredImageUrl ? [featuredImageUrl] : [],
+      },
+      alternates: {
+        canonical: new URL(`/blog/${params.slug}`, baseUrl).toString(),
+      },
+    };
+
+    return metadata;
+  } catch (error) {
+    console.error("Error generating metadata:", error);
     return {
-      title: "Post Not Found",
-      description: "The requested post could not be found.",
+      title: "Error",
+      description: "An error occurred while generating metadata.",
+      robots: {
+        index: false,
+        follow: false,
+      },
     };
   }
-
-  return {
-    title: post.title,
-    description: post.metaDescription || "",
-    keywords: post.metaKeywords
-      ? post.metaKeywords.split(",").map((keyword) => keyword.trim())
-      : [],
-    openGraph: {
-      title: post.title,
-      description: post.metaDescription || "",
-      type: "article",
-      publishedTime: post.publishedAt?.toISOString(),
-      images: post.featuredImage
-        ? [
-            {
-              url: new URL(
-                post.featuredImage,
-                process.env.NEXT_PUBLIC_SITE_URL
-              ).toString(),
-            },
-          ]
-        : [],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: post.title,
-      description: post.metaDescription || "",
-      images: post.featuredImage
-        ? [
-            new URL(
-              post.featuredImage,
-              process.env.NEXT_PUBLIC_SITE_URL
-            ).toString(),
-          ]
-        : [],
-    },
-  };
 }
 
 export default async function BlogPostPage({
