@@ -97,9 +97,9 @@ export async function generateMetadata({
 export default async function BlogPostPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 }) {
-  const { slug } = await params; // Await the params to resolve the Promise
+  const { slug } = params;
 
   try {
     const post = await prisma.post.findUnique({
