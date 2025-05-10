@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import prisma from "@/lib/db";
+import { Metadata } from "next";
 export const dynamic = "force-dynamic";
 export async function generateStaticParams() {
   const posts = await prisma.post.findMany({
@@ -20,6 +21,34 @@ export async function generateStaticParams() {
   });
 
   return posts.map((post) => ({ slug: post.slug }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
+  const post = await prisma.post.findUnique({
+    where: { slug: params.slug },
+    select: {
+      metaDescription: true,
+      metaKeywords: true,
+      title: true,
+    },
+  });
+
+  if (!post) {
+    return {
+      title: "Post Not Found",
+      description: "The requested post could not be found.",
+    };
+  }
+
+  return {
+    title: post.title,
+    description: post.metaDescription || "",
+    keywords: post.metaKeywords ? post.metaKeywords.split(",") : [],
+  };
 }
 
 export default async function BlogPostPage({
@@ -66,6 +95,8 @@ function BlogPost({
           user?: { name?: string | null; image?: string | null };
         }[]
       | null;
+    metaDescription?: string | null;
+    metaKeywords?: string | null;
   };
 }) {
   // Safely handle nullable properties

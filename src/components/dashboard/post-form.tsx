@@ -54,6 +54,8 @@ interface PostFormProps {
     status: "PUBLISHED" | "DRAFT";
     categoryId?: string;
     featuredImage?: string | null;
+    metaDescription?: string;
+    metaKeywords?: string;
   };
   categories: Category[];
   isEditMode: boolean; // Added isEditMode property
@@ -80,6 +82,8 @@ export default function PostForm({ post, categories }: PostFormProps) {
       content: post?.content || "",
       categoryId: post?.categoryId || "",
       status: post?.status || "DRAFT",
+      metaDescription: post?.metaDescription || "",
+      metaKeywords: post?.metaKeywords || "",
     },
   });
 
@@ -321,6 +325,36 @@ export default function PostForm({ post, categories }: PostFormProps) {
               </Button>
             )}
           </div>
+        )}
+      </div>
+
+      {/* Add inputs for metaKeywords and metaDescription */}
+      <div className="space-y-2">
+        <Label htmlFor="metaKeywords">Meta Keywords</Label>
+        <Input
+          id="metaKeywords"
+          {...register("metaKeywords")}
+          placeholder="Enter meta keywords (comma-separated)"
+          className={errors.metaKeywords ? "border-red-500" : ""}
+        />
+        {errors.metaKeywords && (
+          <p className="text-sm text-red-500">{errors.metaKeywords.message}</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="metaDescription">Meta Description</Label>
+        <Textarea
+          id="metaDescription"
+          {...register("metaDescription")}
+          placeholder="Enter meta description"
+          rows={3}
+          className={errors.metaDescription ? "border-red-500" : ""}
+        />
+        {errors.metaDescription && (
+          <p className="text-sm text-red-500">
+            {errors.metaDescription.message}
+          </p>
         )}
       </div>
 

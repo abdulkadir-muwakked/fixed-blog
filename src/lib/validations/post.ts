@@ -9,4 +9,6 @@ export const postSchema = z.object({
   categoryId: z.string().min(1, "Category is required"),
   status: z.enum(["PUBLISHED", "DRAFT"]),
   photo: z.any().optional(),
+  metaDescription: z.string().optional(),
+  metaKeywords: z.string().optional(),
 });
