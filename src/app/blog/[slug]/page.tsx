@@ -34,6 +34,8 @@ export async function generateMetadata({
       metaDescription: true,
       metaKeywords: true,
       title: true,
+      featuredImage: true,
+      publishedAt: true,
     },
   });
 
@@ -47,7 +49,38 @@ export async function generateMetadata({
   return {
     title: post.title,
     description: post.metaDescription || "",
-    keywords: post.metaKeywords ? post.metaKeywords.split(",") : [],
+    keywords: post.metaKeywords
+      ? post.metaKeywords.split(",").map((keyword) => keyword.trim())
+      : [],
+    openGraph: {
+      title: post.title,
+      description: post.metaDescription || "",
+      type: "article",
+      publishedTime: post.publishedAt?.toISOString(),
+      images: post.featuredImage
+        ? [
+            {
+              url: new URL(
+                post.featuredImage,
+                process.env.NEXT_PUBLIC_SITE_URL
+              ).toString(),
+            },
+          ]
+        : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.metaDescription || "",
+      images: post.featuredImage
+        ? [
+            new URL(
+              post.featuredImage,
+              process.env.NEXT_PUBLIC_SITE_URL
+            ).toString(),
+          ]
+        : [],
+    },
   };
 }
 
